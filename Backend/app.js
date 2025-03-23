@@ -1,0 +1,31 @@
+//NHB04jfs3EkRueNA
+
+//mongodb+srv://<db_username>:<db_password>@cluster0.luiw5.mongodb.net/
+
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const cropRouter = require("./routes/cropRoute");
+
+
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+app.use("/crops", cropRouter); 
+
+
+
+// MongoDB connection 
+mongoose.connect("mongodb+srv://farmer:NHB04jfs3EkRueNA@cluster0.luiw5.mongodb.net/")
+    .then(() => 
+        console.log("Connected to MongoDB"))
+        .then(()=>{
+            app.listen(5000);
+        })
+      
+
+    .catch((err) => console.log((err)));
