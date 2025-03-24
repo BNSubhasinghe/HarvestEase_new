@@ -21,7 +21,7 @@ import RegisterPage from './Pages/user/RegisterPage'; // Path to the Register pa
 import PachchaDetail from './Pages/CropDetails/PachchaDetail';
 
 
-import Header from './Components/Header';  
+import Header from './Components/NavBar/FarmerHeader';  
 
 function App() {
   return (
