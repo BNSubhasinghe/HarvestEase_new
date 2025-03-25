@@ -5,6 +5,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const cropRouter = require("./routes/cropRoute");
 const userRoutes = require("./routes/userRoutes");
+const stockRoutes = require('./routes/stockRoutes');  // Import stock routes
+
 
 const app = express();
 
@@ -15,6 +17,7 @@ app.use(express.json());
 // Routes
 app.use("/crops", cropRouter); 
 app.use("/api/users", userRoutes);
+app.use('/api', stockRoutes);
 
 // MongoDB connection 
 mongoose.connect("mongodb+srv://kasuni_k:wgqvS8Xjslbc7oT3@harvestesedb.2trfj.mongodb.net/?retryWrites=true&w=majority&appName=HarvestEseDB")
