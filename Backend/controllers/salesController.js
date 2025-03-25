@@ -14,10 +14,10 @@ const getSales = async (req, res) => {
 const createSale = async (req, res) => {
   try {
     console.log("Request body:", req.body); 
-    const sale = new Sales(req.body); // Create a new instance of the Sales model
-    await sale.save(); // Save the new sale to the database
-    const allSales = await Sales.find().sort({ date: -1 }); // Return the updated list of sales
-    res.status(201).json(allSales); // Send back the updated sales list
+    const sale = new Sales(req.body); 
+    await sale.save(); 
+    const allSales = await Sales.find().sort({ date: -1 }); 
+    res.status(201).json(allSales); 
   } catch (error) {
     console.error("Error in createSale:", error);
     res.status(400).json({ error: error.message });
@@ -38,11 +38,11 @@ const updateSale = async (req, res) => {
 const deleteSale = async (req, res) => {
   try {
     await Sales.findByIdAndDelete(req.params.id);
-    const allSales = await Sales.find().sort({ date: -1 }); // Get the updated list of sales
-    res.status(200).json(allSales); // Return the updated sales list
+    const allSales = await Sales.find().sort({ date: -1 }); 
+    res.status(200).json(allSales); 
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-module.exports = { getSales, createSale, updateSale, deleteSale }; // Export the controller functions
+module.exports = { getSales, createSale, updateSale, deleteSale }; 

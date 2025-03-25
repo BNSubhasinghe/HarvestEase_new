@@ -15,4 +15,4 @@ router.put('/:id', updateSale);
 // Delete a sale
 router.delete('/:id', deleteSale);
 
-module.exports = router; // Correct export syntax using CommonJS
+module.exports = router; 

@@ -5,10 +5,10 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import cropRouter from './routes/cropRoute.js';  // Add .js extension
-import salesRouter from './routes/salesRoutes.js';  // Add .js extension
-import expensesRouter from './routes/expensesRoutes.js';  // Add .js extension
-import reportRouter from './routes/reportRoutes.js';  // Add .js extension
+import cropRouter from './routes/cropRoute.js';  
+import salesRouter from './routes/salesRoutes.js'; 
+import expensesRouter from './routes/expensesRoutes.js'; 
+import reportRouter from './routes/reportRoutes.js'; 
 
 const app = express();
 
@@ -20,7 +20,7 @@ app.use(express.json());
 app.use("/crops", cropRouter);
 app.use("/api/sales", salesRouter);
 app.use("/api/expenses", expensesRouter);
-app.use("/api/report", reportRouter);  // Ensure the report route is used
+app.use("/api/report", reportRouter);  
 
 // MongoDB connection 
 mongoose.connect("mongodb+srv://farmer:NHB04jfs3EkRueNA@cluster0.luiw5.mongodb.net/")
