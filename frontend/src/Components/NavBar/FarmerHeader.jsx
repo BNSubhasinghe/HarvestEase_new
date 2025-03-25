@@ -41,7 +41,7 @@ const FarmerHeader = () => {
   return (
     <header className="bg-green-800 p-4 flex justify-between items-center relative z-[99]">
       <div className="flex items-center space-x-2">
-        <img src="\public\Yellow Vintage Wheat Rice Oats logo.png" alt="HarvestEase" className="w-10 h-10" />
+        <img src="\public\favicon.png" alt="HarvestEase" className="w-10 h-10" />
         <h1 className="text-yellow-500 font-semibold text-xl">HarvestEase</h1>
       </div>
       <div className="space-x-6 text-white">
