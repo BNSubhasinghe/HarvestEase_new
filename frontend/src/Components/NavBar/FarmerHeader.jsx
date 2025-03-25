@@ -73,6 +73,7 @@ const FarmerHeader = () => {
           </div>
 
           <Link to="/finance" className="hover:text-yellow-300">Finance</Link>
+          
 
           {/* Stock Dropdown */}
           <div className="relative inline-block" ref={stockDropdownRef}>
