@@ -11,10 +11,12 @@ import SambaDetail from './Pages/CropDetails/SambaDetail';
 import RedRiceDetail from './Pages/CropDetails/RedRiceDetail';
 import Bg352Detail from './Pages/CropDetails/Bg352Detail';
 import SuwandelDetail from './Pages/CropDetails/SuwandelDetail';
+import FinancialDashboard from './Pages/FinancialDashboard';
 
 import Dashboard from './Pages/Dashboard'; // Path to the Dashboard component
 import LoginPage from './Pages/user/LoginPage'; // Path to the Login page
 import RegisterPage from './Pages/user/RegisterPage'; // Path to the Register page
+
 
 
 
@@ -39,6 +41,7 @@ function App() {
         <Route path="/crop-detail/redrice" element={<RedRiceDetail />} />
         <Route path="/crop-detail/bg352" element={<Bg352Detail />} />
         <Route path="/crop-detail/suwandel" element={<SuwandelDetail />} />
+        <Route path="/finance" element={<FinancialDashboard />} />
         
   
         <Route path="/crop-detail/pachchaperumal" element={<PachchaDetail />} />
