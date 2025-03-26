@@ -1,4 +1,3 @@
-// expensesRoutes.js
 const express = require('express');
 const { 
   getExpenses, 
