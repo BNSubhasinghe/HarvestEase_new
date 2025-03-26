@@ -70,7 +70,7 @@ export default function FinancialDashboard() {
   
   const cropTypes = [
     'Samba Rice', 'Nadu Rice', 'Red Rice', 'BG 352', 
-    'Suwandel', 'Vegetables', 'Fruits', 'Other'
+    'Suwandel'
   ];
 
   const menuItems = [
