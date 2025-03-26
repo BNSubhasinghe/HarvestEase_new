@@ -70,7 +70,7 @@ export default function FinancialDashboard() {
   
   const cropTypes = [
     'Samba Rice', 'Nadu Rice', 'Red Rice', 'BG 352', 
-    'Suwandel', 'Vegetables', 'Fruits', 'Other'
+    'Suwandel'
   ];
 
   const menuItems = [
@@ -321,7 +321,7 @@ export default function FinancialDashboard() {
   
       
       const filteredCropRows = Object.entries(cropProfitData)
-        .filter(([crop]) => !['Vegetables', 'Fruits', 'Other'].includes(crop))
+        .filter(([crop]) => ![].includes(crop))
         .map(([crop, data]) => [
           crop,
           `Rs ${data.revenue.toLocaleString()}`,
