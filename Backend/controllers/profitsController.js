@@ -1,39 +1,41 @@
-import Sales from '../models/salesModel.js';
-import Expenses from '../models/expensesModel.js';
+const Sales = require('../models/salesModel');
+const Expenses = require('../models/expensesModel');
 
-export const getProfits = async (req, res) => {
+const getProfits = async (req, res) => {
   try {
     const { frequency } = req.query;
     let filter = {};
 
     if (frequency && frequency !== 'all') {
       const days = parseInt(frequency);
-      filter.date = { $gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000) };
+      filter.date = {
+        $gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+      };
     }
 
     const [sales, expenses] = await Promise.all([
       Sales.aggregate([
         { $match: filter },
-        { 
-          $group: { 
-            _id: null, 
-            total: { 
-              $sum: { 
-                $multiply: ['$quantity', '$price'] 
-              } 
-            } 
-          } 
+        {
+          $group: {
+            _id: null,
+            total: {
+              $sum: {
+                $multiply: ['$quantity', '$price']
+              }
+            }
+          }
         }
       ]),
       Expenses.aggregate([
         { $match: filter },
-        { 
-          $group: { 
-            _id: null, 
-            total: { 
-              $sum: '$amount' 
-            } 
-          } 
+        {
+          $group: {
+            _id: null,
+            total: {
+              $sum: '$amount'
+            }
+          }
         }
       ])
     ]);
@@ -46,4 +48,8 @@ export const getProfits = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+};
+
+module.exports = {
+  getProfits
 };
