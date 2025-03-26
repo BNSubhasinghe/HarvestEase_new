@@ -1,4 +1,4 @@
-const Sales = require('../models/salesModel'); // Use require, not import
+const Sales = require('../models/salesModel');
 
 // Get all sales
 const getSales = async (req, res) => {
@@ -13,7 +13,7 @@ const getSales = async (req, res) => {
 // Create a new sale
 const createSale = async (req, res) => {
   try {
-    console.log("Request body:", req.body); 
+    console.log("Request body:", req.body);  
     const sale = new Sales(req.body); 
     await sale.save(); 
     const allSales = await Sales.find().sort({ date: -1 }); 
@@ -34,7 +34,7 @@ const updateSale = async (req, res) => {
   }
 };
 
-// Delete a sale
+
 const deleteSale = async (req, res) => {
   try {
     await Sales.findByIdAndDelete(req.params.id);
