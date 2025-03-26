@@ -70,7 +70,7 @@ export default function FinancialDashboard() {
   
   const cropTypes = [
     'Samba Rice', 'Nadu Rice', 'Red Rice', 'BG 352', 
-    'Suwandel'
+    'Suwandel', 'Vegetables', 'Fruits', 'Other'
   ];
 
   const menuItems = [
@@ -259,31 +259,45 @@ export default function FinancialDashboard() {
     fetchData(); 
   }, [dateRange, cropFilter]);
 
+  
+
+
   const generatePDF = async () => {
     try {
       const cropProfitData = calculateCropProfitData();
       const doc = new jsPDF();
       
-      // Add logo and title
-      const logoBase64 = await getBase64Image('/Yellow Vintage Wheat Rice Oats logo.png');
-      const logoWidth = 20;
-      const logoHeight = 20;
-      
-      doc.addImage(logoBase64, 'PNG', 14, 10, logoWidth, logoHeight);
-      
-      // Add title text
-      doc.setFontSize(20);
-      doc.setTextColor(245, 158, 11); // yellow-500 color
-      doc.setFont('helvetica', 'bold');
-      doc.text('HarvestEase', 14 + logoWidth + 5, 20);
-      
+      // Add logo and title with error handling
+      try {
+        const logoBase64 = await getBase64Image('/Yellow Vintage Wheat Rice Oats logo.png');
+        if (logoBase64) {
+          const logoWidth = 20;
+          const logoHeight = 20;
+          doc.addImage(logoBase64, 'PNG', 14, 10, logoWidth, logoHeight);
+          doc.setFontSize(20);
+          doc.setTextColor(245, 158, 11);
+          doc.setFont('helvetica', 'bold');
+          doc.text('HarvestEase', 14 + logoWidth + 5, 20);
+        }
+      } catch (error) {
+        console.error('Error loading logo:', error);
+        // Fallback title if logo fails
+        doc.setFontSize(20);
+        doc.setTextColor(245, 158, 11);
+        doc.setFont('helvetica', 'bold');
+        doc.text('HarvestEase', 14, 20);
+      }
+  
       // Reset text settings
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(10);
       
-      // Add date range info
-      doc.text(`Date Range: ${dateRange[0]?.format('YYYY-MM-DD') || ''} to ${dateRange[1]?.format('YYYY-MM-DD') || ''}`, 14, 35);
+      // SAFE DATE RANGE HANDLING - FIXED DATE FORMATTING
+      const formattedStartDate = dateRange?.[0]?.isValid() ? dateRange[0].format('YYYY-MM-DD') : '';
+      const formattedEndDate = dateRange?.[1]?.isValid() ? dateRange[1].format('YYYY-MM-DD') : '';
+      doc.text(`Date Range: ${formattedStartDate} to ${formattedEndDate}`, 14, 35);
       
+      // Add financial summary
       doc.setFontSize(12);
       doc.autoTable({
         head: [['Metric', 'Value']],
@@ -299,25 +313,30 @@ export default function FinancialDashboard() {
         styles: { cellPadding: 5, fontSize: 12 },
         headStyles: { fillColor: [22, 160, 133] }
       });
-
-      const cropRows = Object.entries(cropProfitData).map(([crop, data]) => [
-        crop,
-        `Rs ${data.revenue.toLocaleString()}`,
-        `Rs ${data.expenses.toLocaleString()}`,
-        `Rs ${(data.revenue - data.expenses).toLocaleString()}`,
-        `${data.expenses > 0 ? ((data.revenue - data.expenses) / data.expenses * 100).toFixed(2) : 0}%`
-      ]);
-
+  
+      // Filter out unwanted crops (Vegetables, Fruits, Other)
+      const filteredCropRows = Object.entries(cropProfitData)
+        .filter(([crop]) => !['Vegetables', 'Fruits', 'Other'].includes(crop))
+        .map(([crop, data]) => [
+          crop,
+          `Rs ${data.revenue.toLocaleString()}`,
+          `Rs ${data.expenses.toLocaleString()}`,
+          `Rs ${(data.revenue - data.expenses).toLocaleString()}`,
+          `${data.expenses > 0 ? ((data.revenue - data.expenses) / data.expenses * 100).toFixed(2) : 0}%`
+        ]);
+  
+      // Add crop-wise profitability (only for filtered crops)
       doc.setFontSize(14);
       doc.text('Crop-wise Profitability', 14, doc.lastAutoTable.finalY + 15);
       doc.autoTable({
         head: [['Crop', 'Revenue', 'Expenses', 'Profit', 'ROI']],
-        body: cropRows,
+        body: filteredCropRows,
         startY: doc.lastAutoTable.finalY + 20,
         styles: { cellPadding: 5, fontSize: 10 },
         headStyles: { fillColor: [52, 152, 219] }
       });
-
+  
+      // Save the PDF
       doc.save(`HarvestEase-Report-${dayjs().format('YYYY-MM-DD')}.pdf`);
       
     } catch (error) {
