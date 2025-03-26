@@ -11,13 +11,12 @@ import SambaDetail from './Pages/CropDetails/SambaDetail';
 import RedRiceDetail from './Pages/CropDetails/RedRiceDetail';
 import Bg352Detail from './Pages/CropDetails/Bg352Detail';
 import SuwandelDetail from './Pages/CropDetails/SuwandelDetail';
-
-
-
 import PachchaDetail from './Pages/CropDetails/PachchaDetail';
 
 
 import Header from './Components/NavBar/FarmerHeader';  
+
+
 
 function App() {
   return (
@@ -35,9 +34,9 @@ function App() {
         <Route path="/crop-detail/redrice" element={<RedRiceDetail />} />
         <Route path="/crop-detail/bg352" element={<Bg352Detail />} />
         <Route path="/crop-detail/suwandel" element={<SuwandelDetail />} />
-        
-  
         <Route path="/crop-detail/pachchaperumal" element={<PachchaDetail />} />
+
+
         
 
       </Routes>
