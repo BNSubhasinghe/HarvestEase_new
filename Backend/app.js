@@ -2,14 +2,14 @@
 
 //mongodb+srv://<db_username>:<db_password>@cluster0.luiw5.mongodb.net/
 
-import express from 'express';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import cropRouter from './routes/cropRoute.js';  // Add .js extension
-import salesRouter from './routes/salesRoutes.js';  // Add .js extension
-import expensesRouter from './routes/expensesRoutes.js';  // Add .js extension
-import reportRouter from './routes/reportRoutes.js';  // Add .js extension
-import userRouter from './routes/userRoutes.js';
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const cropRouter = require('./routes/cropRoute'); 
+const salesRouter = require('./routes/salesRoutes');  
+const expensesRouter = require('./routes/expensesRoutes');  
+const reportRouter = require('./routes/reportRoutes'); 
+const userRouter = require('./routes/userRoutes');  
 
 const app = express();
 
