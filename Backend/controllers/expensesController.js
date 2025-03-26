@@ -1,6 +1,6 @@
-import Expenses from '../models/expensesModel.js';
+const Expenses = require('../models/expensesModel');
 
-export const getExpenses = async (req, res) => {
+const getExpenses = async (req, res) => {
   try {
     const { frequency } = req.query;
     let filter = {};
@@ -17,18 +17,18 @@ export const getExpenses = async (req, res) => {
   }
 };
 
-export const createExpense = async (req, res) => {
+const createExpense = async (req, res) => {
   try {
-    console.log("Request body for expense:", req.body);  // Log the request body
+    console.log("Request body for expense:", req.body);
     const expense = await Expenses.create(req.body);
-    res.status(201).json(expense);  // Respond with the created expense
+    res.status(201).json(expense);
   } catch (error) {
     console.error("Error in createExpense:", error);
     res.status(400).json({ error: error.message });
   }
 };
 
-export const updateExpense = async (req, res) => {
+const updateExpense = async (req, res) => {
   try {
     const updatedExpense = await Expenses.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.status(200).json(updatedExpense);
@@ -37,11 +37,18 @@ export const updateExpense = async (req, res) => {
   }
 };
 
-export const deleteExpense = async (req, res) => {
+const deleteExpense = async (req, res) => {
   try {
     await Expenses.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: 'Expense deleted' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+};
+
+module.exports = {
+  getExpenses,
+  createExpense,
+  updateExpense,
+  deleteExpense
 };
