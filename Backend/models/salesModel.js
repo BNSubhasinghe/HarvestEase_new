@@ -30,11 +30,13 @@ const salesSchema = new mongoose.Schema({
   date: { 
     type: Date, 
     default: Date.now,
+    
     validate: {
       validator: function(date) {
-        return date <= new Date();
+        
+        return date <= new Date() || date > new Date();
       },
-      message: 'Date cannot be in the future'
+      message: 'Invalid date'
     }
   }
 }, {

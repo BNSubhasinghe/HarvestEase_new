@@ -22,19 +22,14 @@ const expensesSchema = new mongoose.Schema({
   },
   date: { 
     type: Date, 
-    default: Date.now,
-    validate: {
-      validator: function(date) {
-        return date <= new Date();
-      },
-      message: 'Date cannot be in the future'
-    }
+    default: Date.now, // Default to current date
+    // No validation needed, allows both past and future dates
   }
 }, {
   timestamps: true
 });
 
-
+// Add index for better query performance
 expensesSchema.index({ category: 1, date: -1 });
 expensesSchema.index({ crop: 1 });
 

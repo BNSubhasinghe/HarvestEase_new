@@ -19,9 +19,11 @@ export const getExpenses = async (req, res) => {
 
 export const createExpense = async (req, res) => {
   try {
+    console.log("Request body for expense:", req.body);  // Log the request body
     const expense = await Expenses.create(req.body);
-    res.status(201).json(expense);
+    res.status(201).json(expense);  // Respond with the created expense
   } catch (error) {
+    console.error("Error in createExpense:", error);
     res.status(400).json({ error: error.message });
   }
 };
