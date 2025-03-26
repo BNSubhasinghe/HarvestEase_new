@@ -353,22 +353,31 @@ export default function FinancialDashboard() {
   const handleAddSale = async (values) => {
     setLoading(true);
     try {
+      const selectedDate = values.date ? values.date.format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD');
+      const today = dayjs().format('YYYY-MM-DD');
+    
+      // Ensure the selected date is not in the future
+      if (selectedDate > today) {
+        message.error('Sale date cannot be in the future.');
+        return; // Prevent the request from being sent
+      }
+    
       const url = editSale ? `http://localhost:5000/api/sales/${editSale._id}` : 'http://localhost:5000/api/sales';
       const method = editSale ? 'PUT' : 'POST';
-
+    
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...values,
-          date: values.date ? values.date.format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD')
+          date: selectedDate
         })
       });
-
+    
       if (!response.ok) {
         throw new Error('Failed to save sale');
       }
-
+    
       setIsSaleModalVisible(false);
       form.resetFields();
       setEditSale(null);
@@ -381,6 +390,7 @@ export default function FinancialDashboard() {
       setLoading(false);
     }
   };
+  
 
   const handleEditSale = (sale) => {
     form.setFieldsValue({
@@ -416,22 +426,31 @@ export default function FinancialDashboard() {
   const handleAddExpense = async (values) => {
     setLoading(true);
     try {
+      const selectedDate = values.date ? values.date.format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD'); // Format the date as string
+      const today = dayjs().format('YYYY-MM-DD'); // Get today's date as string
+  
+      // Ensure the selected date is not in the future
+      if (selectedDate > today) {
+        message.error('Expense date cannot be in the future.');
+        return; // Prevent the request from being sent
+      }
+  
       const url = editExpense ? `http://localhost:5000/api/expenses/${editExpense._id}` : 'http://localhost:5000/api/expenses';
       const method = editExpense ? 'PUT' : 'POST';
-
+  
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...values,
-          date: values.date ? values.date.format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD')
+          date: selectedDate // Send the formatted date
         })
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to save expense');
       }
-
+  
       setIsExpenseModalVisible(false);
       expenseForm.resetFields();
       setEditExpense(null);
@@ -444,6 +463,7 @@ export default function FinancialDashboard() {
       setLoading(false);
     }
   };
+  
 
   const handleEditExpense = (expense) => {
     expenseForm.setFieldsValue({
