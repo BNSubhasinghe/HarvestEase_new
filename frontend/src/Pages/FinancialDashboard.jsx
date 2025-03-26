@@ -70,7 +70,7 @@ export default function FinancialDashboard() {
   
   const cropTypes = [
     'Samba Rice', 'Nadu Rice', 'Red Rice', 'BG 352', 
-    'Suwandel', 'Vegetables', 'Fruits', 'Other'
+    'Suwandel'
   ];
 
   const menuItems = [
@@ -259,30 +259,49 @@ export default function FinancialDashboard() {
     fetchData(); 
   }, [dateRange, cropFilter]);
 
+  
+
+
   const generatePDF = async () => {
     try {
       const cropProfitData = calculateCropProfitData();
       const doc = new jsPDF();
       
-      // Add logo and title
-      const logoBase64 = await getBase64Image('/Yellow Vintage Wheat Rice Oats logo.png');
-      const logoWidth = 20;
-      const logoHeight = 20;
       
-      doc.addImage(logoBase64, 'PNG', 14, 10, logoWidth, logoHeight);
-      
-      // Add title text
-      doc.setFontSize(20);
-      doc.setTextColor(245, 158, 11); // yellow-500 color
-      doc.setFont('helvetica', 'bold');
-      doc.text('HarvestEase', 14 + logoWidth + 5, 20);
-      
-      // Reset text settings
+      let logoHeight = 0;
+      try {
+        const logoBase64 = await getBase64Image('/Yellow Vintage Wheat Rice Oats logo.png');
+        if (logoBase64) {
+          const logoWidth = 20;
+          logoHeight = 20;
+          doc.addImage(logoBase64, 'PNG', 14, 10, logoWidth, logoHeight);
+          doc.setFontSize(20);
+          doc.setTextColor(245, 158, 11);
+          doc.setFont('helvetica', 'bold');
+          doc.text('HarvestEase', 14 + logoWidth + 5, 25); 
+        }
+      } catch (error) {
+        console.error('Error loading logo:', error);
+        
+        doc.setFontSize(20);
+        doc.setTextColor(245, 158, 11);
+        doc.setFont('helvetica', 'bold');
+        doc.text('HarvestEase', 14, 25);
+      }
+  
+     
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(10);
       
-      // Add date range info
-      doc.text(`Date Range: ${dateRange[0]?.format('YYYY-MM-DD') || ''} to ${dateRange[1]?.format('YYYY-MM-DD') || ''}`, 14, 35);
+      
+      const reportDate = dayjs().format('YYYY-MM-DD hh:mm A');
+      doc.text(`Report Generated: ${reportDate}`, 14, 40); 
+      
+      
+      const formattedStartDate = dateRange?.[0]?.isValid() ? dateRange[0].format('YYYY-MM-DD') : '';
+      const formattedEndDate = dateRange?.[1]?.isValid() ? dateRange[1].format('YYYY-MM-DD') : '';
+      doc.text(`Date Range: ${formattedStartDate} to ${formattedEndDate}`, 14, 50); // Adjusted position
+      
       
       doc.setFontSize(12);
       doc.autoTable({
@@ -295,30 +314,35 @@ export default function FinancialDashboard() {
           ['Total Sales', sales.reduce((sum, sale) => sum + sale.quantity, 0)],
           ['Total Expenses', expenses.length]
         ],
-        startY: 45,
+        startY: 60, 
         styles: { cellPadding: 5, fontSize: 12 },
         headStyles: { fillColor: [22, 160, 133] }
       });
-
-      const cropRows = Object.entries(cropProfitData).map(([crop, data]) => [
-        crop,
-        `Rs ${data.revenue.toLocaleString()}`,
-        `Rs ${data.expenses.toLocaleString()}`,
-        `Rs ${(data.revenue - data.expenses).toLocaleString()}`,
-        `${data.expenses > 0 ? ((data.revenue - data.expenses) / data.expenses * 100).toFixed(2) : 0}%`
-      ]);
-
+  
+      
+      const filteredCropRows = Object.entries(cropProfitData)
+        .filter(([crop]) => ![].includes(crop))
+        .map(([crop, data]) => [
+          crop,
+          `Rs ${data.revenue.toLocaleString()}`,
+          `Rs ${data.expenses.toLocaleString()}`,
+          `Rs ${(data.revenue - data.expenses).toLocaleString()}`,
+          `${data.expenses > 0 ? ((data.revenue - data.expenses) / data.expenses * 100).toFixed(2) : 0}%`
+        ]);
+  
+      
       doc.setFontSize(14);
       doc.text('Crop-wise Profitability', 14, doc.lastAutoTable.finalY + 15);
       doc.autoTable({
         head: [['Crop', 'Revenue', 'Expenses', 'Profit', 'ROI']],
-        body: cropRows,
+        body: filteredCropRows,
         startY: doc.lastAutoTable.finalY + 20,
         styles: { cellPadding: 5, fontSize: 10 },
         headStyles: { fillColor: [52, 152, 219] }
       });
-
-      doc.save(`HarvestEase-Report-${dayjs().format('YYYY-MM-DD')}.pdf`);
+  
+    
+      doc.save(`HarvestEase-Report-${dayjs().format('YYYY-MM-DD-HHmm')}.pdf`);
       
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -742,9 +766,6 @@ export default function FinancialDashboard() {
                     }}
                   >
                     PDF Report
-                  </Button>
-                  <Button icon={<FileExcelOutlined />} disabled>
-                    Excel Export
                   </Button>
                 </Space>
               }
