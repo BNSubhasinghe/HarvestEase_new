@@ -267,37 +267,42 @@ export default function FinancialDashboard() {
       const cropProfitData = calculateCropProfitData();
       const doc = new jsPDF();
       
-      // Add logo and title with error handling
+      
+      let logoHeight = 0;
       try {
         const logoBase64 = await getBase64Image('/Yellow Vintage Wheat Rice Oats logo.png');
         if (logoBase64) {
           const logoWidth = 20;
-          const logoHeight = 20;
+          logoHeight = 20;
           doc.addImage(logoBase64, 'PNG', 14, 10, logoWidth, logoHeight);
           doc.setFontSize(20);
           doc.setTextColor(245, 158, 11);
           doc.setFont('helvetica', 'bold');
-          doc.text('HarvestEase', 14 + logoWidth + 5, 20);
+          doc.text('HarvestEase', 14 + logoWidth + 5, 25); 
         }
       } catch (error) {
         console.error('Error loading logo:', error);
-        // Fallback title if logo fails
+        
         doc.setFontSize(20);
         doc.setTextColor(245, 158, 11);
         doc.setFont('helvetica', 'bold');
-        doc.text('HarvestEase', 14, 20);
+        doc.text('HarvestEase', 14, 25);
       }
   
-      // Reset text settings
+     
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(10);
       
-      // SAFE DATE RANGE HANDLING - FIXED DATE FORMATTING
+      
+      const reportDate = dayjs().format('YYYY-MM-DD hh:mm A');
+      doc.text(`Report Generated: ${reportDate}`, 14, 40); 
+      
+      
       const formattedStartDate = dateRange?.[0]?.isValid() ? dateRange[0].format('YYYY-MM-DD') : '';
       const formattedEndDate = dateRange?.[1]?.isValid() ? dateRange[1].format('YYYY-MM-DD') : '';
-      doc.text(`Date Range: ${formattedStartDate} to ${formattedEndDate}`, 14, 35);
+      doc.text(`Date Range: ${formattedStartDate} to ${formattedEndDate}`, 14, 50); // Adjusted position
       
-      // Add financial summary
+      
       doc.setFontSize(12);
       doc.autoTable({
         head: [['Metric', 'Value']],
@@ -309,12 +314,12 @@ export default function FinancialDashboard() {
           ['Total Sales', sales.reduce((sum, sale) => sum + sale.quantity, 0)],
           ['Total Expenses', expenses.length]
         ],
-        startY: 45,
+        startY: 60, 
         styles: { cellPadding: 5, fontSize: 12 },
         headStyles: { fillColor: [22, 160, 133] }
       });
   
-      // Filter out unwanted crops (Vegetables, Fruits, Other)
+      
       const filteredCropRows = Object.entries(cropProfitData)
         .filter(([crop]) => !['Vegetables', 'Fruits', 'Other'].includes(crop))
         .map(([crop, data]) => [
@@ -325,7 +330,7 @@ export default function FinancialDashboard() {
           `${data.expenses > 0 ? ((data.revenue - data.expenses) / data.expenses * 100).toFixed(2) : 0}%`
         ]);
   
-      // Add crop-wise profitability (only for filtered crops)
+      
       doc.setFontSize(14);
       doc.text('Crop-wise Profitability', 14, doc.lastAutoTable.finalY + 15);
       doc.autoTable({
@@ -336,8 +341,8 @@ export default function FinancialDashboard() {
         headStyles: { fillColor: [52, 152, 219] }
       });
   
-      // Save the PDF
-      doc.save(`HarvestEase-Report-${dayjs().format('YYYY-MM-DD')}.pdf`);
+    
+      doc.save(`HarvestEase-Report-${dayjs().format('YYYY-MM-DD-HHmm')}.pdf`);
       
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -761,9 +766,6 @@ export default function FinancialDashboard() {
                     }}
                   >
                     PDF Report
-                  </Button>
-                  <Button icon={<FileExcelOutlined />} disabled>
-                    Excel Export
                   </Button>
                 </Space>
               }
