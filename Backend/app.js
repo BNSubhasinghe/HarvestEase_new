@@ -20,13 +20,26 @@ app.use("/api/users", userRoutes);
 app.use('/api', stockRoutes);
 
 // MongoDB connection 
-mongoose.connect("mongodb+srv://kasuni_k:wgqvS8Xjslbc7oT3@harvestesedb.2trfj.mongodb.net/?retryWrites=true&w=majority&appName=HarvestEseDB")
-    .then(() => {
-        console.log("Connected to MongoDB");
-        app.listen(5000, () => {
-            console.log("Server is running on port 5000");
-        });
-    })
-    .catch((err) => {
-        console.log("MongoDB connection error: ", err);
-    });
+// mongoose.connect("mongodb+srv://kasuni_k:wgqvS8Xjslbc7oT3@harvestesedb.2trfj.mongodb.net/?retryWrites=true&w=majority&appName=HarvestEseDB")
+//     .then(() => {
+//         console.log("Connected to MongoDB");
+//         app.listen(5000, () => {
+//             console.log("Server is running on port 5000");
+//         });
+//     })
+//     .catch((err) => {
+//         console.log("MongoDB connection error: ", err);
+//     });
+
+
+
+    // MongoDB connection
+mongoose.connect("mongodb+srv://farmer:NHB04jfs3EkRueNA@cluster0.luiw5.mongodb.net/")
+.then(() => {
+console.log("Connected to MongoDB");
+// Start the server after successful MongoDB connection
+app.listen(5000, () => {
+console.log('Server is running on port 5000');
+});
+})
+.catch((err) => console.log(err));

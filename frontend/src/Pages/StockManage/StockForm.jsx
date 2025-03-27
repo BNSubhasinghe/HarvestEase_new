@@ -1,4 +1,3 @@
-// src/Pages/StockManage/StockForm.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -17,8 +16,8 @@ const StockForm = ({ setStocks }) => {
     harvestedDate: '',
     storageTemperature: '',
     storageHumidity: '',
-    processingType: '',
-    packagingType: '',
+    processingType: '', // Rice-related field
+    packagingType: '', // Rice-related field
     bestBeforeDate: '',
     storageLocation: '',
     qualityGrade: 'A',
@@ -32,12 +31,24 @@ const StockForm = ({ setStocks }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Prepare data for submission
+    const dataToSubmit = { ...formData };
+
+    // Conditionally omit processingType and packagingType if cropType is 'paddy'
+    if (formData.cropType === 'paddy') {
+      delete dataToSubmit.processingType;
+      delete dataToSubmit.packagingType;
+    }
+
     try {
-      const response = await axios.post('http://localhost:5000/api/add-stock', formData);
+      const response = await axios.post('http://localhost:5000/api/add-stock', dataToSubmit);
       if (response.status === 200) {
         setStocks((prevStocks) => [...prevStocks, response.data]);
         alert('Stock added successfully');
-        setFormData({ // Reset form after successful submission
+        
+        // Reset form after successful submission
+        setFormData({
           farmerId: '',
           farmerName: '',
           farmerEmail: '',
