@@ -1,3 +1,4 @@
+
 // reportRoutes.js
 
 const express = require('express');
@@ -7,4 +8,5 @@ const router = express.Router();
 
 router.get('/generate', generateReport); 
 
-module.exports = router; // Correct export using module.exports
+module.exports = router; 
+
