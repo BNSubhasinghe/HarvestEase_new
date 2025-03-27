@@ -1,4 +1,5 @@
-require('dotenv').config(); // Load environment variables from .env file
+//NHB04jfs3EkRueNA
+
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -8,18 +9,32 @@ const userRoutes = require("./routes/userRoutes");
 const stockRoutes = require('./routes/stockRoutes');  // Import stock routes
 
 
+//mongodb+srv://<db_username>:<db_password>@cluster0.luiw5.mongodb.net/
+
+
+
+
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
+
 // Routes
 app.use("/crops", cropRouter); 
 app.use("/api/users", userRoutes);
 app.use('/api', stockRoutes);
 
+// Set up routes
+
+app.use("/api/sales", salesRouter);
+app.use("/api/expenses", expensesRouter);
+app.use("/api/report", reportRouter);  
+
+
 // MongoDB connection 
+
 // mongoose.connect("mongodb+srv://kasuni_k:wgqvS8Xjslbc7oT3@harvestesedb.2trfj.mongodb.net/?retryWrites=true&w=majority&appName=HarvestEseDB")
 //     .then(() => {
 //         console.log("Connected to MongoDB");
