@@ -2,6 +2,8 @@
 
 //mongodb+srv://<db_username>:<db_password>@cluster0.luiw5.mongodb.net/
 
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -11,7 +13,11 @@ const expensesRouter = require('./routes/expensesRoutes');
 const reportRouter = require('./routes/reportRoutes'); 
 const userRouter = require('./routes/userRoutes');  
 
+const diseaseRouter = require('./routes/diseaseRoute');//mayomi
+
 const app = express();
+
+console.log("Plant API Key:", process.env.PLANT_API_KEY);//mayomi
 
 // Middleware
 app.use(cors());
@@ -23,6 +29,8 @@ app.use("/api/sales", salesRouter);
 app.use("/api/expenses", expensesRouter);
 app.use("/api/report", reportRouter);
 app.use("/api/users", userRouter);
+
+app.use("/api/diseases", diseaseRouter);//mayomi
 
 // MongoDB connection 
 mongoose.connect("mongodb+srv://farmer:NHB04jfs3EkRueNA@cluster0.luiw5.mongodb.net/")
