@@ -16,11 +16,11 @@ import FinancialDashboard from './Pages/FinancialDashboard';
 import Dashboard from './Pages/Dashboard'; // Path to the Dashboard component
 import LoginPage from './Pages/user/LoginPage'; // Path to the Login page
 import RegisterPage from './Pages/user/RegisterPage'; // Path to the Register page
-
-
-
-
 import PachchaDetail from './Pages/CropDetails/PachchaDetail';
+
+import StockPage from './Pages/StockManage/StockPage'; // Import StockPage
+
+
 
 
 import Header from './Components/NavBar/FarmerHeader';  
@@ -43,6 +43,11 @@ function App() {
         <Route path="/crop-detail/suwandel" element={<SuwandelDetail />} />
         <Route path="/finance" element={<FinancialDashboard />} />
         
+
+        <Route path="/stock-management" element={<StockPage />} />
+        
+
+
   
         <Route path="/crop-detail/pachchaperumal" element={<PachchaDetail />} />
         

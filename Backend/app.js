@@ -1,5 +1,7 @@
 //NHB04jfs3EkRueNA
 
+
+
 //mongodb+srv://<db_username>:<db_password>@cluster0.luiw5.mongodb.net/
 
 require('dotenv').config();
@@ -12,8 +14,9 @@ const salesRouter = require('./routes/salesRoutes');
 const expensesRouter = require('./routes/expensesRoutes');  
 const reportRouter = require('./routes/reportRoutes'); 
 const userRouter = require('./routes/userRoutes');  
-
+const stockRoutes = require('./routes/stockRoutes');
 const diseaseRouter = require('./routes/diseaseRoute');//mayomi
+
 
 const app = express();
 
@@ -29,8 +32,9 @@ app.use("/api/sales", salesRouter);
 app.use("/api/expenses", expensesRouter);
 app.use("/api/report", reportRouter);
 app.use("/api/users", userRouter);
-
+app.use('/api', stockRoutes);
 app.use("/api/diseases", diseaseRouter);//mayomi
+
 
 // MongoDB connection 
 mongoose.connect("mongodb+srv://farmer:NHB04jfs3EkRueNA@cluster0.luiw5.mongodb.net/")
