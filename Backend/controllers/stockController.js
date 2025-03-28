@@ -45,3 +45,43 @@ exports.getStocks = async (req, res) => {
     });
   }
 };
+
+// In your stockController.js
+// Controller to update a stock by its ID
+exports.updateStock = async (req, res) => {
+  const { id } = req.params; // Get the stock ID from the URL
+  const updatedStockData = req.body; // Get the updated stock data from the request body
+
+  try {
+    const updatedStock = await Stock.findByIdAndUpdate(id, updatedStockData, { new: true });
+    if (!updatedStock) {
+      return res.status(404).json({ message: 'Stock not found' });
+    }
+    res.status(200).json(updatedStock); // Send the updated stock as a response
+  } catch (error) {
+    console.error('Error updating stock:', error.message);
+    res.status(500).json({
+      message: 'Failed to update stock',
+      error: error.message,
+    });
+  }
+};
+
+// In your stockController.js
+// Controller to delete stock
+exports.deleteStock = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const stock = await Stock.findByIdAndDelete(id); // Delete the stock by its ID
+
+    if (!stock) {
+      return res.status(404).json({ message: 'Stock not found' });
+    }
+
+    res.status(200).json({ message: 'Stock deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting stock:', error.message);
+    res.status(500).json({ message: 'Failed to delete stock', error: error.message });
+  }
+};
+

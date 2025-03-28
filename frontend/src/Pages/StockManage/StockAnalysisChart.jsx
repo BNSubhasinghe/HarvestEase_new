@@ -22,7 +22,9 @@ const StockAnalysisChart = ({ stocks }) => {
   return (
     <div className="mb-8">
       <h2 className="text-xl font-semibold mb-4">Stock Quantity Analysis</h2>
+      <div style={{ position: 'relative', width: '80%', height: '300px' }}>  {/* Adjust width and height here */}
       <Line data={data} />
+      </div>
     </div>
   );
 };

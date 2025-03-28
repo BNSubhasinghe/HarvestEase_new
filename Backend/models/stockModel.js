@@ -19,14 +19,15 @@ const stockSchema = new mongoose.Schema({
     type: String, 
     enum: ['raw', 'parboiled', 'polished'], 
     default: null, 
-    required: function() { return this.cropType === 'rice'; }  // Only required if cropType is rice
+    required: function() { return this.cropType === 'rice'; }
   },
   packagingType: { 
     type: String, 
     enum: ['sack', 'box', 'loose'], 
     default: null,
-    required: function() { return this.cropType === 'rice'; }  // Only required if cropType is rice
+    required: function() { return this.cropType === 'rice'; }
   },
+  
   bestBeforeDate: { type: Date, required: false },
   storageLocation: { type: String, required: true },
   qualityGrade: { type: String, enum: ['A', 'B', 'C', 'premium', 'standard', 'low'], required: true },

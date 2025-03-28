@@ -87,7 +87,7 @@ const FarmerHeader = () => {
               <div className="absolute top-[-10px] bg-white text-green-800 rounded-md shadow-lg mt-[58px] w-[140px]">
                 <div className="mb-[5px] mt-[5px] flex flex-col items-start content-start">
                   <button className="mb-[5px] mt-[5px] m-[5px]">
-                    <Link to="/inventory" className="hover:text-yellow-300 p-2 text-center w-full text-left">Inventory</Link>
+                    <Link to="/stock-management" className="hover:text-yellow-300 p-2 text-center w-full text-left">Inventory</Link>
                   </button>
                   <button className="mt-[5px] mb-[5px] m-[5px]">
                     <Link to="/shop" className="hover:text-yellow-300 p-2 text-center w-full text-left">Shop</Link>
