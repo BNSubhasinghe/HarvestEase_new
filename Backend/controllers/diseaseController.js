@@ -1,4 +1,3 @@
-// controllers/diseaseController.js
 const Disease = require('../models/diseaseModel');
 const multer = require('multer');
 const path = require('path');
@@ -15,6 +14,29 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// External API request function
+const fetchExternalDiseases = async (affectedParts, symptoms) => {
+    try {
+        // Dynamically import fetch
+        const { default: fetch } = await import('node-fetch');
+        
+        const response = await fetch(`https://crop.kindwise.com/api/v1`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer NGXBHMAex01ipHhfvocubcTZOQtf9Oi6b6FLyq1H2YcrEfPp3l`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ affectedParts, symptoms })
+        });
+
+        const apiData = await response.json();
+        return apiData;
+    } catch (err) {
+        throw new Error('Error fetching data from external API: ' + err.message);
+    }
+};
+
+// Add disease info for admin
 const addDisease = async (req, res) => {
     try {
         const { diseaseName, affectedParts, symptoms, favorableConditions, treatments, nextSeasonManagement } = req.body;
@@ -52,17 +74,38 @@ const updateDisease = async (req, res) => {
     try {
         const { id } = req.params;
         const { diseaseName, affectedParts, symptoms, favorableConditions, treatments, nextSeasonManagement } = req.body;
-        const updatedDisease = await Disease.findByIdAndUpdate(id, {
+        
+        // Parse JSON strings back to arrays
+        const parsedAffectedParts = JSON.parse(affectedParts);
+        const parsedSymptoms = JSON.parse(symptoms);
+        const parsedFavorableConditions = JSON.parse(favorableConditions);
+        const parsedTreatments = JSON.parse(treatments);
+        const parsedNextSeasonManagement = JSON.parse(nextSeasonManagement);
+
+        // Create update object
+        const updateData = {
             diseaseName,
-            affectedParts,
-            symptoms,
-            favorableConditions,
-            treatments,
-            nextSeasonManagement
-        }, { new: true });
+            affectedParts: parsedAffectedParts,
+            symptoms: parsedSymptoms,
+            favorableConditions: parsedFavorableConditions,
+            treatments: parsedTreatments,
+            nextSeasonManagement: parsedNextSeasonManagement
+        };
+
+        // If there's a new image, update the imageUrl
+        if (req.file) {
+            updateData.imageUrl = '/uploads/' + req.file.filename;
+        }
+
+        const updatedDisease = await Disease.findByIdAndUpdate(id, updateData, { new: true });
+
+        if (!updatedDisease) {
+            return res.status(404).json({ message: 'Disease not found' });
+        }
 
         res.status(200).json(updatedDisease);
     } catch (err) {
+        console.error('Update error:', err);
         res.status(500).json({ message: err.message });
     }
 };
@@ -78,30 +121,24 @@ const deleteDisease = async (req, res) => {
     }
 };
 
-// Search for diseases based on user input (farmer's query)
+// Search for diseases based on farmer's query (affectedParts and symptoms)
 const searchDisease = async (req, res) => {
     try {
         const { affectedParts, symptoms } = req.body;
+
+        // Perform case-insensitive matching using regex
         const diseases = await Disease.find({
-            affectedParts: { $in: affectedParts },
-            symptoms: { $in: symptoms }
+            affectedParts: { $regex: affectedParts, $options: 'i' },
+            symptoms: { $regex: symptoms, $options: 'i' }
         });
 
+        // If matches are found in the database, return them
         if (diseases.length > 0) {
             return res.status(200).json(diseases);
         }
 
-        // If no match is found, use the external API for further suggestions
-        const response = await fetch(`https://plant.id/api/v3/plant-diseases?affectedParts=${affectedParts}&symptoms=${symptoms}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${process.env.PLANT_API_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ affectedParts, symptoms }),
-        });
-
-        const apiData = await response.json();
+        // If no matches, fetch from external API
+        const apiData = await fetchExternalDiseases(affectedParts, symptoms);
         res.status(200).json(apiData);
     } catch (err) {
         res.status(500).json({ message: err.message });

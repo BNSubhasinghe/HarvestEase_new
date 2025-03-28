@@ -23,6 +23,9 @@ console.log("Plant API Key:", process.env.PLANT_API_KEY);//mayomi
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
+
 // Set up routes
 app.use("/crops", cropRouter);
 app.use("/api/sales", salesRouter);
