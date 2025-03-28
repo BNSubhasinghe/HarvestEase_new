@@ -9,14 +9,18 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const cropRouter = require('./routes/cropRoute');  
+const cropRouter = require('./routes/cropRoute'); 
 const salesRouter = require('./routes/salesRoutes');  
 const expensesRouter = require('./routes/expensesRoutes');  
-const reportRouter = require('./routes/reportRoutes');  
-const userRouter = require('./routes/userRoutes'); 
+const reportRouter = require('./routes/reportRoutes'); 
+const userRouter = require('./routes/userRoutes');  
 const stockRoutes = require('./routes/stockRoutes');
+const diseaseRouter = require('./routes/diseaseRoute');//mayomi
+
 
 const app = express();
+
+console.log("Plant API Key:", process.env.PLANT_API_KEY);//mayomi
 
 // Middleware
 app.use(cors());
@@ -29,6 +33,8 @@ app.use("/api/expenses", expensesRouter);
 app.use("/api/report", reportRouter);
 app.use("/api/users", userRouter);
 app.use('/api', stockRoutes);
+app.use("/api/diseases", diseaseRouter);//mayomi
+
 
 // MongoDB connection 
 mongoose.connect("mongodb+srv://farmer:NHB04jfs3EkRueNA@cluster0.luiw5.mongodb.net/")
