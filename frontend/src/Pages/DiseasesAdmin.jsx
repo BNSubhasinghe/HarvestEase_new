@@ -275,7 +275,7 @@ function DiseasesAdmin() {
   };
 
   const renderForm = (isEdit = false) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto mt-[60px]">
       <div className="bg-white rounded-lg w-full max-w-2xl my-8 relative">
         <div className="bg-white p-6 border-b flex justify-between items-center">
           <h2 className="text-2xl font-bold text-green-800">
@@ -534,7 +534,7 @@ function DiseasesAdmin() {
                   </button>
                   <button
                     onClick={() => handleEdit(disease)}
-                    className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 flex items-center gap-2"
+                    className="px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 flex items-center gap-2"
                   >
                     <FaEdit size={16} />
                     <span>Update</span>
