@@ -6,7 +6,7 @@ const router = express.Router();
 // Admin routes for managing diseases
 router.post('/add', upload.single('image'), addDisease);
 router.get('/', getDiseases);
-router.put('/:id', updateDisease);
+router.put('/:id', upload.single('image'), updateDisease);
 router.delete('/:id', deleteDisease);
 
 // Farmer route to search diseases
