@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const expensesSchema = new mongoose.Schema({
+
   category: {
     type: String,
     required: [true, 'Category is required'],
@@ -12,6 +13,7 @@ const expensesSchema = new mongoose.Schema({
     min: [0.01, 'Amount must be greater than 0']
   },
   description: {
+
     type: String,
     trim: true,
     maxlength: [500, 'Description cannot exceed 500 characters']
@@ -20,9 +22,11 @@ const expensesSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+
   date: {
     type: Date,
     default: Date.now
+
   }
 }, {
   timestamps: true
@@ -32,3 +36,4 @@ expensesSchema.index({ category: 1, date: -1 });
 expensesSchema.index({ crop: 1 });
 
 module.exports = mongoose.model('Expense', expensesSchema);
+

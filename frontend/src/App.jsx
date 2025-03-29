@@ -12,9 +12,9 @@ import RedRiceDetail from './Pages/CropDetails/RedRiceDetail';
 import Bg352Detail from './Pages/CropDetails/Bg352Detail';
 import SuwandelDetail from './Pages/CropDetails/SuwandelDetail';
 import FinancialDashboard from './Pages/FinancialDashboard';
-import Dashboard from './Pages/Dashboard';
-import LoginPage from './Pages/user/LoginPage';
-import RegisterPage from './Pages/user/RegisterPage';
+import Dashboard from './Pages/Dashboard'; // Path to the Dashboard component
+import LoginPage from './Pages/user/LoginPage'; // Path to the Login page
+import RegisterPage from './Pages/user/RegisterPage'; // Path to the Register page
 import PachchaDetail from './Pages/CropDetails/PachchaDetail';
 import Header from './Components/NavBar/FarmerHeader';
 import Footer from './Components/Footer';
@@ -40,6 +40,10 @@ function App() {
         <Route path="/crop-detail/bg352" element={<Bg352Detail />} />
         <Route path="/crop-detail/suwandel" element={<SuwandelDetail />} />
         <Route path="/finance" element={<FinancialDashboard />} />
+        <Route path="/stock-management" element={<StockPage />} />
+        
+
+
         <Route path="/crop-detail/pachchaperumal" element={<PachchaDetail />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
