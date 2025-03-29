@@ -63,7 +63,7 @@ const StockPage = () => {
 
       {/* Conditional Rendering Based on the Section */}
       {currentSection === 'overview' && (
-        <StockTable stocks={stocks} />
+        <StockTable stocks={stocks} setStocks={setStocks} />
       )}
 
       {currentSection === 'addStock' && (

@@ -18,10 +18,10 @@ import RegisterPage from './Pages/user/RegisterPage'; // Path to the Register pa
 import PachchaDetail from './Pages/CropDetails/PachchaDetail';// Path to the PachchaDetail component
 import Header from './Components/NavBar/FarmerHeader';
 import Footer from './Components/Footer';
+import StockPage from './Pages/StockManage/StockPage'; // kasuni
 import DiseaseUser from './Pages/DiseaseUser';
 import DiseasesAdmin from './Pages/DiseasesAdmin';
 import KnowledgeHub from './Pages/KnowleadgeHub';
-import StockPage from './Pages/StockManage/StockPage';
 import './App.css';
 
 function App() {
@@ -42,6 +42,7 @@ function App() {
         <Route path="/crop-detail/suwandel" element={<SuwandelDetail />} />
         <Route path="/finance" element={<FinancialDashboard />} />
         <Route path="/stock-management" element={<StockPage />} />
+
         
 
 
