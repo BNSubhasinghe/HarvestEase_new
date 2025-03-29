@@ -97,7 +97,7 @@ const FarmerHeader = () => {
             )}
           </div>
 
-          <Link to="/plantcare" className="hover:text-yellow-300">Plant Care</Link>
+          <Link to="/disease-user" className="hover:text-yellow-300">Plant Care</Link>
           <button className="bg-yellow-500 text-green-800 py-2 px-4 rounded-md hover:bg-yellow-400">Log In</button>
           <button className="bg-yellow-500 text-green-800 py-2 px-4 rounded-md hover:bg-yellow-400">Sign Up</button>
         </nav>
