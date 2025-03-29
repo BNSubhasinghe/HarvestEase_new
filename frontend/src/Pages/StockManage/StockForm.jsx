@@ -11,13 +11,13 @@ const StockForm = ({ setStocks }) => {
     quantity: '',
     quantityUnit: 'kg',
     price: '',
-    stockDate: new Date().toISOString().slice(0, 10),  // default to today
+    stockDate: new Date().toISOString().slice(0, 10),
     moistureLevel: '',
     harvestedDate: '',
     storageTemperature: '',
     storageHumidity: '',
-    processingType: '', // Rice-related field
-    packagingType: '', // Rice-related field
+    processingType: '',
+    packagingType: '',
     bestBeforeDate: '',
     storageLocation: '',
     qualityGrade: 'A',
@@ -41,12 +41,22 @@ const StockForm = ({ setStocks }) => {
       delete dataToSubmit.packagingType;
     }
 
+    // Validate form fields based on cropType
+    if (formData.cropType === 'rice' && !formData.processingType) {
+      alert('Please select the processing type for rice.');
+      return;
+    }
+    if (formData.cropType === 'rice' && !formData.packagingType) {
+      alert('Please select the packaging type for rice.');
+      return;
+    }
+
     try {
       const response = await axios.post('http://localhost:5000/api/add-stock', dataToSubmit);
       if (response.status === 200) {
         setStocks((prevStocks) => [...prevStocks, response.data]);
         alert('Stock added successfully');
-        
+
         // Reset form after successful submission
         setFormData({
           farmerId: '',
@@ -73,6 +83,7 @@ const StockForm = ({ setStocks }) => {
       }
     } catch (error) {
       console.error('Error adding stock:', error);
+      alert('Failed to add stock. Please try again.');
     }
   };
 
