@@ -17,8 +17,11 @@ import LoginPage from './Pages/user/LoginPage';
 import RegisterPage from './Pages/user/RegisterPage';
 import PachchaDetail from './Pages/CropDetails/PachchaDetail';
 import Header from './Components/NavBar/FarmerHeader';
+import Footer from './Components/Footer';
 import DiseaseUser from './Pages/DiseaseUser';
 import DiseasesAdmin from './Pages/DiseasesAdmin';
+import KnowledgeHub from './Pages/KnowleadgeHub';
+import './App.css';
 
 function App() {
   return (
@@ -45,7 +48,10 @@ function App() {
 
         <Route path="/disease-user" element={<DiseaseUser />} />
         <Route path="/diseases-admin" element={<DiseasesAdmin />} />
+        <Route path="/knowledge-hub" element={<KnowledgeHub />} />
+
       </Routes>
+      <Footer />
     </>
   );
 }

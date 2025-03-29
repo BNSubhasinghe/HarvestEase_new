@@ -58,7 +58,7 @@ function DiseaseUser() {
       ></div>
 
       {/* Knowledge Hub Button */}
-      <button 
+      <button title="Knowledge Hub" 
         className="fixed bottom-8 right-8 bg-green-600 text-white rounded-full p-4 shadow-lg hover:bg-green-700 transition-colors z-50"
         onClick={() => window.location.href = '/knowledge-hub'}
       >
