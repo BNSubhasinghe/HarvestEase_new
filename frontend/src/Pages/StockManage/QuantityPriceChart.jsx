@@ -5,12 +5,16 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const QuantityPriceChart = ({ stocks }) => {
-  const data = {
-    labels: stocks.map(stock => stock.variety),
+  // Filter stocks by crop type
+  const riceStocks = stocks.filter(stock => stock.cropType === 'rice');
+  const paddyStocks = stocks.filter(stock => stock.cropType === 'paddy');
+
+  const createChartData = (data) => ({
+    labels: data.map(stock => stock.variety),
     datasets: [
       {
         label: 'Price vs Quantity',
-        data: stocks.map(stock => stock.price),
+        data: data.map(stock => stock.price),
         backgroundColor: [
           'rgba(255, 99, 132, 0.5)',  // Pink
           'rgba(54, 162, 235, 0.5)',  // Blue
@@ -30,11 +34,11 @@ const QuantityPriceChart = ({ stocks }) => {
         borderWidth: 1,
       },
     ],
-  };
+  });
 
   const options = {
-    responsive: true,  // Ensures the chart is responsive
-    maintainAspectRatio: false,  // Allows custom sizing
+    responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
@@ -48,10 +52,21 @@ const QuantityPriceChart = ({ stocks }) => {
   };
 
   return (
-    <div className="mb-8">
-      <h2 className="text-xl font-semibold mb-4">Quantity vs Price Analysis</h2>
-      <div style={{ position: 'relative', width: '80%', height: '300px' }}>  {/* Adjust width and height here */}
-        <Bar data={data} options={options} />
+    <div className="mb-8 flex flex-row justify-around items-center w-full">
+      {/* Rice chart */}
+      <div className="mb-8 w-1/2 flex flex-col items-center">
+        <h2 className="text-xl font-semibold mb-4">Rice: Quantity vs Price Analysis</h2>
+        <div style={{ position: 'relative', width: '80%', height: '300px' }}>
+          <Bar data={createChartData(riceStocks)} options={options} />
+        </div>
+      </div>
+
+      {/* Paddy chart */}
+      <div className="mb-8 w-1/2 flex flex-col items-center">
+        <h2 className="text-xl font-semibold mb-4">Paddy: Quantity vs Price Analysis</h2>
+        <div style={{ position: 'relative', width: '80%', height: '300px' }}>
+          <Bar data={createChartData(paddyStocks)} options={options} />
+        </div>
       </div>
     </div>
   );
