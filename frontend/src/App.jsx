@@ -15,11 +15,14 @@ import FinancialDashboard from './Pages/FinancialDashboard';
 import Dashboard from './Pages/Dashboard'; // Path to the Dashboard component
 import LoginPage from './Pages/user/LoginPage'; // Path to the Login page
 import RegisterPage from './Pages/user/RegisterPage'; // Path to the Register page
-import PachchaDetail from './Pages/CropDetails/PachchaDetail';
+import PachchaDetail from './Pages/CropDetails/PachchaDetail';// Path to the PachchaDetail component
+import Header from './Components/NavBar/FarmerHeader';
+import Footer from './Components/Footer';
 import StockPage from './Pages/StockManage/StockPage'; // kasuni
-import Header from './Components/NavBar/FarmerHeader';  
 import DiseaseUser from './Pages/DiseaseUser';
 import DiseasesAdmin from './Pages/DiseasesAdmin';
+import KnowledgeHub from './Pages/KnowleadgeHub';
+import './App.css';
 
 function App() {
   return (
@@ -51,7 +54,10 @@ function App() {
 
         <Route path="/disease-user" element={<DiseaseUser />} />
         <Route path="/diseases-admin" element={<DiseasesAdmin />} />
+        <Route path="/knowledge-hub" element={<KnowledgeHub />} />
+
       </Routes>
+      <Footer />
     </>
   );
 }
