@@ -14,7 +14,6 @@ import pachchaImg from '../assets/pachcha.jpg';
 const CropPlanning = () => {
   const navigate = useNavigate();
 
-  // ✅ Crop Data
   const crops = [
     { name: 'Nadu', description: 'Popular for dry zones, moderate growth, high yield.', image: naduImg },
     { name: 'Samba', description: 'Fragrant, fine grain, needs longer growth period.', image: sambaImg },
@@ -24,21 +23,16 @@ const CropPlanning = () => {
     { name: 'Pachchaperumal', description: 'Traditional red rice, rich in fiber and nutrients.', image: pachchaImg },
   ];
 
-  // ✅ Search + Pagination State
-  const [searchTerm, setSearchTerm] = useState('');
+  // ✅ Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const cropsPerPage = 3;
 
-  // ✅ Filter + Pagination Logic
-  const filteredCrops = crops.filter(crop =>
-    crop.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  const totalPages = Math.ceil(filteredCrops.length / cropsPerPage);
+  // ✅ Pagination Logic
+  const totalPages = Math.ceil(crops.length / cropsPerPage);
   const indexOfLastCrop = currentPage * cropsPerPage;
   const indexOfFirstCrop = indexOfLastCrop - cropsPerPage;
-  const currentCrops = filteredCrops.slice(indexOfFirstCrop, indexOfLastCrop);
+  const currentCrops = crops.slice(indexOfFirstCrop, indexOfLastCrop);
 
-  // ✅ Helper Function for Navigation Route
   const getCropRoute = (name) => {
     switch (name.toLowerCase()) {
       case 'nadu': return '/crop-detail/nadu';
@@ -56,20 +50,9 @@ const CropPlanning = () => {
       <h1 className="text-4xl font-bold text-center mb-2 text-[#1A512E]">
         Crop Tracking
       </h1>
-      <p className="text-center text-gray-600 mb-4">
+      <p className="text-center text-gray-600 mb-8">
         Select a paddy type to track growth and plan your harvest.
       </p>
-
-      {/* 🔍 Search Input */}
-      <div className="flex justify-center mb-6">
-        <input
-          type="text"
-          placeholder="Search paddy type..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="p-2 border border-gray-300 rounded w-full max-w-md"
-        />
-      </div>
 
       {/* 📦 Crop Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
@@ -90,7 +73,7 @@ const CropPlanning = () => {
               <h2 className="text-xl font-semibold text-[#1A512E]">{crop.name}</h2>
               <p className="text-gray-600 mt-2">{crop.description}</p>
 
-              {/* ✅ View More Button with Icon */}
+              {/* ✅ View More Button */}
               <button
                 onClick={() => navigate(getCropRoute(crop.name))}
                 className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition flex items-center mx-auto"

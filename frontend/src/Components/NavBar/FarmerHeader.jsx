@@ -49,29 +49,7 @@ const FarmerHeader = () => {
           <Link to="/" className="hover:text-yellow-300">Home</Link>
           <Link to="/service" className="hover:text-yellow-300">Service</Link>
           <Link to="/about" className="hover:text-yellow-300">About</Link>
-
-          {/* Crop Dropdown */}
-          <div className="relative inline-block" ref={cropDropdownRef}>
-            <button
-              onClick={handleCropDropdown}
-              className="hover:text-yellow-300"
-            >
-              Crop
-            </button>
-            {cropDropdown && (
-              <div className="absolute top-[-10px] bg-white text-green-800 rounded-md shadow-lg mt-[58px] w-[140px]">
-                <div className="mb-[5px] mt-[5px] flex flex-col items-start content-start">
-                  <button className="mb-[5px] mt-[5px] m-[5px]">
-                    <Link to="/crop-form" className="hover:text-yellow-300 p-2 text-center">Crop Form</Link>
-                  </button>
-                  <button className="mt-[5px] mb-[5px] m-[5px]">
-                    <Link to="/crop-table" className="hover:text-yellow-300 p-2 text-center">Crop Table</Link>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
+          <Link to="/crop-landing" className="hover:text-yellow-300">Crop</Link>
           <Link to="/finance" className="hover:text-yellow-300">Finance</Link>
           
 
