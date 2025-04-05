@@ -1,10 +1,11 @@
+// ... [imports remain unchanged]
 import React, { useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
-import sharedBg from '../assets/shared_bg.png';  // Or your new file: '../assets/image.png'
+import sharedBg from '../assets/shared_bg.png';
 
 const CropForm = () => {
   const [formData, setFormData] = useState({
@@ -21,10 +22,21 @@ const CropForm = () => {
     landArea: '',
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const today = new Date().toISOString().split('T')[0];
+
+  const capitalizeWords = (str) =>
+    str.replace(/\b\w/g, char => char.toUpperCase());
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === 'farmerName') {
+      const lettersOnly = value.replace(/[^A-Za-z\s]/g, '');
+      setFormData(prev => ({ ...prev, [name]: capitalizeWords(lettersOnly) }));
+      return;
+    }
 
     if (name === 'phoneNumber') {
       const digitOnly = value.replace(/\D/g, '');
@@ -51,6 +63,7 @@ const CropForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     let valid = true;
     let newErrors = { phoneNumber: '', landArea: '' };
@@ -67,12 +80,25 @@ const CropForm = () => {
     }
 
     setErrors(newErrors);
-    if (!valid) return;
+    if (!valid) {
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await axios.post('http://localhost:5000/crops/add', formData);
       setResult(response.data.crops);
-      toast.success("🌾 Crop data submitted successfully!");
+      toast.success(" Crop data submitted successfully!");
+
+      // ✅ Send SMS but remove toast messages for it
+      try {
+        await axios.post('http://localhost:5000/api/send-sms', {
+          phoneNumber: `+94${formData.phoneNumber}`,
+          message: `Hello ${formData.farmerName}, your ${formData.paddyType} paddy cultivation has been registered successfully!\n\nPlanted Date: ${formData.plantedDate}\nLand Area: ${formData.landArea} hectares\n\nThank you for using our service!`
+        });
+      } catch (smsError) {
+        console.error('SMS Error:', smsError); // ✅ only log error, no toast
+      }
 
       setFormData({
         farmerName: '',
@@ -89,6 +115,8 @@ const CropForm = () => {
     } catch (err) {
       console.error('Error:', err);
       toast.error("❌ Submission failed. Try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -105,10 +133,8 @@ const CropForm = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7 }}
     >
-      {/* Overlay for dimming effect */}
       <div className="absolute inset-0 bg-white opacity-10 z-0"></div>
 
-      {/* Form container above overlay */}
       <form
         onSubmit={handleSubmit}
         className="bg-white bg-opacity-90 p-8 rounded-lg shadow-md w-full max-w-md relative z-10"
@@ -117,6 +143,7 @@ const CropForm = () => {
           Crop Tracking Form
         </h2>
 
+        {/* Farmer Name */}
         <label className="block mb-2 font-semibold">Farmer Name</label>
         <input
           type="text"
@@ -124,10 +151,11 @@ const CropForm = () => {
           value={formData.farmerName}
           onChange={handleChange}
           className="w-full border border-gray-300 rounded px-3 py-2 mb-4"
-          placeholder="Enter your name"
+          placeholder="Enter only letters"
           required
         />
 
+        {/* Paddy Type */}
         <label className="block mb-2 font-semibold">Paddy Type</label>
         <select
           name="paddyType"
@@ -145,16 +173,19 @@ const CropForm = () => {
           <option value="Pachchaperumal">Pachchaperumal</option>
         </select>
 
+        {/* Planted Date */}
         <label className="block mb-2 font-semibold">Planted Date</label>
         <input
           type="date"
           name="plantedDate"
           value={formData.plantedDate}
           onChange={handleChange}
+          min={today}
           className="w-full border border-gray-300 rounded px-3 py-2 mb-4"
           required
         />
 
+        {/* Land Area */}
         <label className="block mb-2 font-semibold">Land Area (Hectares)</label>
         <input
           type="number"
@@ -168,6 +199,7 @@ const CropForm = () => {
         />
         {errors.landArea && <p className="text-red-600 text-sm mb-3">{errors.landArea}</p>}
 
+        {/* Phone Number */}
         <label className="block mb-2 font-semibold">Phone Number</label>
         <input
           type="tel"
@@ -180,13 +212,16 @@ const CropForm = () => {
         />
         {errors.phoneNumber && <p className="text-red-600 text-sm mb-3">{errors.phoneNumber}</p>}
 
+        {/* Submit Button */}
         <button
           type="submit"
-          className="bg-[#1A512E] hover:bg-green-800 text-white font-bold py-2 px-4 rounded w-full"
+          className="bg-[#1A512E] hover:bg-green-800 text-white font-bold py-2 px-4 rounded w-full disabled:opacity-50"
+          disabled={isSubmitting}
         >
-          Submit
+          {isSubmitting ? 'Processing...' : 'Submit'}
         </button>
 
+        {/* Display Result */}
         {result && (
           <div className="mt-6 p-4 bg-green-50 rounded text-green-800">
             <p><strong>Fertilization Date:</strong> {result.fertilizationDate}</p>
