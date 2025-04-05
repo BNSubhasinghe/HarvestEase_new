@@ -20,13 +20,19 @@ import RedRiceDetail from './Pages/CropDetails/RedRiceDetail';
 import Bg352Detail from './Pages/CropDetails/Bg352Detail';
 import SuwandelDetail from './Pages/CropDetails/SuwandelDetail';
 import PachchaDetail from './Pages/CropDetails/PachchaDetail';
-
 import CropTrackingDetail from './Pages/CropTrackingDetail';
 import HarvestStockDetail from './Pages/HarvestStockDetail';
 import CostTrackingDetail from './Pages/CostTrackingDetail';
 import SmartPlantCareDetail from './Pages/SmartPlantCareDetail';
-
-
+import FinancialDashboard from './Pages/FinancialDashboard';
+import Dashboard from './Pages/Dashboard'; // Path to the Dashboard component
+import LoginPage from './Pages/user/LoginPage'; // Path to the Login page
+import RegisterPage from './Pages/user/RegisterPage'; // Path to the Register page
+import StockPage from './Pages/StockManage/StockPage'; // kasuni
+import DiseaseUser from './Pages/DiseaseUser';
+import DiseasesAdmin from './Pages/DiseasesAdmin';
+import KnowledgeHub from './Pages/KnowleadgeHub';
+import './App.css';
 
 
 function App() {
@@ -50,6 +56,7 @@ function App() {
   return (
     <>
       <Header />
+
       <div className="flex">
         {showCropSidebar && <CropSidebar />}
         <div className="flex-1 p-4">
@@ -83,6 +90,20 @@ function App() {
           </Routes>
         </div>
       </div>
+
+      <Routes>
+ 
+        <Route path="/finance" element={<FinancialDashboard />} />
+        <Route path="/stock-management" element={<StockPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        {/* <Route path="/" exact component={<LoginPage />} /> */}
+        <Route path="/disease-user" element={<DiseaseUser />} />
+        <Route path="/diseases-admin" element={<DiseasesAdmin />} />
+        <Route path="/knowledge-hub" element={<KnowledgeHub />} />
+
+      </Routes>
       <Footer />
     </>
   );
