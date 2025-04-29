@@ -19,6 +19,10 @@ import PachchaDetail from './Pages/CropDetails/PachchaDetail';// Path to the Pac
 import Header from './Components/NavBar/FarmerHeader';
 import Footer from './Components/Footer';
 import StockPage from './Pages/StockManage/StockPage'; // kasuni
+import ShopPage from './Pages/StockManage/ShopPage'; // kasuni
+import ShopDetailPage from './Pages/StockManage/ShopDetailPage';
+import CartPage from './Pages/StockManage/CartPage'; // kasuni
+import NaduStockDetail from './Pages/StockManage/NaduStockDetail';   // kasuni
 import DiseaseUser from './Pages/DiseaseUser';
 import DiseasesAdmin from './Pages/DiseasesAdmin';
 import KnowledgeHub from './Pages/KnowleadgeHub';
@@ -41,7 +45,13 @@ function App() {
         <Route path="/crop-detail/bg352" element={<Bg352Detail />} />
         <Route path="/crop-detail/suwandel" element={<SuwandelDetail />} />
         <Route path="/finance" element={<FinancialDashboard />} />
+
+        {/* kasuni */}
         <Route path="/stock-management" element={<StockPage />} />
+        <Route path="/shop" element={<ShopPage />} /> 
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/shop-detail/:id" element={<ShopDetailPage />} />
+        <Route path="/nadu-stock-detail" element={<NaduStockDetail />} />
 
         
 
