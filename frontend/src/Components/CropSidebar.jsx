@@ -1,30 +1,69 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { 
+  FaClipboardList, 
+  FaTable, 
+  FaChartLine,
+  FaLeaf
+} from 'react-icons/fa';
 
 const CropSidebar = () => {
-  return (
-    <div className="w-64 h-screen bg-green-50 text-green-900 p-6 shadow-md border-r border-green-200 rounded-tr-3xl rounded-br-3xl flex flex-col items-center">
-      <h2 className="text-2xl font-extrabold mb-8 text-center">Crop Tracking</h2>
+  const location = useLocation();
 
-      <nav className="w-full flex flex-col gap-4">
+  return (
+    <div className="w-64 h-screen bg-gradient-to-b from-green-50 to-green-100 border-r border-green-200 p-6 flex flex-col">
+      {/* Branding Header */}
+      <div className="flex items-center mb-8 pt-4">
+        <FaLeaf className="text-3xl text-green-700 mr-3" />
+        <h1 className="text-xl font-bold text-green-800">
+          Crop Tracking
+        </h1>
+      </div>
+
+      {/* Navigation Links */}
+      <nav className="space-y-2 flex-1">
         <Link
           to="/crop-form"
-          className="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg shadow text-center font-medium transition"
+          className={`flex items-center px-4 py-3 rounded-lg transition-all ${
+            location.pathname === "/crop-form"
+              ? 'bg-green-600 text-white shadow-md'
+              : 'text-green-700 hover:bg-green-200'
+          }`}
         >
-          Crop Form
+          <FaClipboardList className="mr-3" />
+          <span className="font-medium">Crop Form</span>
         </Link>
+
         <Link
           to="/crop-table"
-          className="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg shadow text-center font-medium transition"
+          className={`flex items-center px-4 py-3 rounded-lg transition-all ${
+            location.pathname === "/crop-table"
+              ? 'bg-green-600 text-white shadow-md'
+              : 'text-green-700 hover:bg-green-200'
+          }`}
         >
-          Crop Records
+          <FaTable className="mr-3" />
+          <span className="font-medium">Crop Records</span>
         </Link>
+
         <Link
           to="/crop-chart"
-          className="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg shadow text-center font-medium transition"
+          className={`flex items-center px-4 py-3 rounded-lg transition-all ${
+            location.pathname === "/crop-chart"
+              ? 'bg-green-600 text-white shadow-md'
+              : 'text-green-700 hover:bg-green-200'
+          }`}
         >
-          Crop Chart
+          <FaChartLine className="mr-3" />
+          <span className="font-medium">Crop Analytics</span>
         </Link>
       </nav>
+
+      {/* Footer */}
+      <div className="mt-auto pt-4 border-t border-green-200">
+        <p className="text-xs text-green-600 text-center">
+          HarnessEase Crop Management
+        </p>
+      </div>
     </div>
   );
 };
