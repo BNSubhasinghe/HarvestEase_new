@@ -33,6 +33,7 @@ import AdminDashboard from "./Pages/AdminDashboard";
 import NotAuthorized from "./Pages/NotAuthorized";
 import PrivateRoute from "./Components/PrivateRoute";
 
+
 function App() {
   const location = useLocation();
 

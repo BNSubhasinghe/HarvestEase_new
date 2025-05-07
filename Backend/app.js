@@ -4,6 +4,8 @@ const cors = require("cors");
 const cropRouter = require("./routes/cropRoute");
 const authRouter = require("./routes/authRoute"); // ✅ Added line
 
+
+
 const app = express();
 
 // Middleware
@@ -13,6 +15,7 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRouter);   // ✅ Added route for auth
 app.use("/crops", cropRouter);      // Existing crop route
+
 
 // MongoDB connection
 mongoose.connect("mongodb+srv://farmer:NHB04jfs3EkRueNA@cluster0.luiw5.mongodb.net/harvestease?retryWrites=true&w=majority")
