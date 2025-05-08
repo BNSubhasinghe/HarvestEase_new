@@ -13,10 +13,10 @@ const cropRouter = require('./routes/cropRoute');
 const salesRouter = require('./routes/salesRoutes');  
 const expensesRouter = require('./routes/expensesRoutes');  
 const reportRouter = require('./routes/reportRoutes'); 
-const userRouter = require('./routes/userRoutes');  
 const stockRoutes = require('./routes/stockRoutes');
 const diseaseRouter = require('./routes/diseaseRoute');//mayomi
-
+const adminRoutes = require('./routes/adminRoutes');
+const authRouter = require("./routes/authRoute");
 
 const app = express();
 
@@ -34,9 +34,10 @@ app.use("/crops", cropRouter);
 app.use("/api/sales", salesRouter);
 app.use("/api/expenses", expensesRouter);
 app.use("/api/report", reportRouter);
-app.use("/api/users", userRouter);
 app.use('/api', stockRoutes);
 app.use("/api/diseases", diseaseRouter);//mayomi
+app.use('/api/admin', adminRoutes);
+app.use("/api/auth", authRouter);
 
 
 // MongoDB connection 

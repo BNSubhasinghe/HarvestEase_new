@@ -12,19 +12,20 @@ const Bg352Detail = () => {
         <div className="p-6">
           <h1 className="text-3xl font-bold text-[#1A512E] mb-4">Bg 352 Paddy</h1>
           <p className="text-gray-700 text-lg leading-relaxed">
-            Bg 352 is a high-yield hybrid paddy variety developed for short-term cultivation. It matures quickly, 
-            making it ideal for areas with limited growing seasons or farmers seeking faster harvest cycles. 
-            This variety is resistant to common pests and diseases.
+            Bg 352 is a hybrid paddy variety developed for short-term cultivation with high yield potential.
+            It matures faster compared to traditional varieties and is ideal for farmers looking for quicker harvests.
             <br /><br />
-            The grains are slender and white, with good cooking quality and texture. Due to its efficiency and productivity, 
-            Bg 352 is widely adopted by commercial farmers across Sri Lanka.
+            Its grains are long and slender, offering good cooking quality and taste. Bg 352 performs well in diverse
+            soil conditions and is resistant to certain pests and diseases, making it a favorite among commercial farmers.
           </p>
-          <button
-            onClick={() => navigate(-1)}
-            className="mt-6 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-          >
-            ← Back to Crops
-          </button>
+          <div className="flex justify-between mt-6">
+            <button onClick={() => navigate(-1)} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+              ← Back to Crops
+            </button>
+            <button onClick={() => navigate('/crop-form')} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+              ➕ Track Crop
+            </button>
+          </div>
         </div>
       </div>
     </div>

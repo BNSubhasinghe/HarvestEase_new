@@ -8,7 +8,7 @@ const {
 
 const router = express.Router();
 
-router.get('/', getExpenses);
+router.get('/:user', getExpenses); // Filter expenses by user ID
 router.post('/', createExpense);
 router.put('/:id', updateExpense);
 router.delete('/:id', deleteExpense);

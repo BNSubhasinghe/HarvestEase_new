@@ -3,7 +3,8 @@ const Expenses = require('../models/expensesModel');
 const getExpenses = async (req, res) => {
   try {
     const { frequency } = req.query;
-    let filter = {};
+    const userId = req.params.user; // Get the user ID from the request parameters
+    let filter = { user: userId }; // Filter by user ID
 
     if (frequency && frequency !== 'all') {
       const days = parseInt(frequency);
