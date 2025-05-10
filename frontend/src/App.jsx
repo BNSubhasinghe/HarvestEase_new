@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 
 import Home from './Pages/Home';
 import AboutUs from './Pages/AboutUs';
@@ -32,6 +32,7 @@ import StockPage from './Pages/StockManage/StockPage'; // kasuni
 import DiseaseUser from './Pages/DiseaseUser';
 import DiseasesAdmin from './Pages/DiseasesAdmin';
 import KnowledgeHub from './Pages/KnowleadgeHub';
+import AdminDashboard from './Pages/AdminDashboard';
 import AdminFinancialDashboard from './Pages/AdminFinancialDashboard';
 import FarmerHome from './Pages/FarmerHome.jsx';
 import AdminHome from './Pages/AdminHome.jsx';
@@ -45,6 +46,7 @@ import './App.css';
 
 function App() {
   const location = useLocation();
+  const navigate = useNavigate();
 
    // Pages that need the Crop Sidebar
    const cropSidebarRoutes = [
@@ -61,26 +63,47 @@ function App() {
     location.pathname.startsWith(path)
   );
 
-  const ProtectedRoute = ({ element }) => {
+  const ProtectedRoute = ({ access, element }) => {
     const { currentUser } = useAuth();
-    return currentUser ? element : <Navigate to="/login" />;
+    console.log('current user: ', currentUser);
+
+    if (!currentUser) {
+      navigate("/login");
+    }
+
+    if (!access.includes(currentUser?.role)) {
+      navigate("/not-authorized");
+    }
+    
+    return element;
   };
 
   
-  const handleHome = ({ element }) => {
+  const handleNavigation = ({ page, element }) => {
     {/* should be redirect relavant home page acording to the user role */}
     const { currentUser } = useAuth();
     if (currentUser) {
       if (currentUser.role === 'admin') {
-        return <Navigate to="/admin-home" />;
+        switch (page) {
+          case 'home':
+            return <Navigate to="/admin-home" />;
+          case 'finance':
+            return <Navigate to="/admin-finance" />;
+          default:
+            break;
+        }
       } else if (currentUser.role === 'farmer') {
-        return <Navigate to="/farmer-home" />;
-      } else {
-        return element; // Default case, render the element
+        switch (page) {
+          case 'home':
+            return <Navigate to="/farmer-home" />;
+          case 'finance':
+            return <Navigate to="/farmer-finance" />;
+          default:
+            break;
+        }
       }
-    } else {
-      return <Navigate to="/login" />; // Redirect to login if not authenticated
     }
+    return element;
   };
 
   return (
@@ -92,7 +115,7 @@ function App() {
         <div className="flex-1 p-4">
           <Routes>
             {/* relavant Home Page */}
-            <Route path="/" element={handleHome({ element: <Home /> })} />
+            <Route path="/" element={handleNavigation({ page: "home", element: <Home /> })} />
 
             {/* ✅ Crop Module */}
             <Route path="/crop-landing" element={<CropLanding />} />
@@ -122,9 +145,10 @@ function App() {
       </div>
 
       <Routes>
- 
-        <Route path="/finance" element={<FinancialDashboard />} />
-        <Route path="/admin-finance" element={<AdminFinancialDashboard />} />
+         <Route path="/finance" element={handleNavigation({page: "finance", element: <FinancialDashboard /> }) } />
+        <Route path="/farmer-finance" element={<ProtectedRoute access={["farmer"]} element={<FinancialDashboard />} />} />
+        <Route path="/admin-dashboard" element={<ProtectedRoute access={["admin"]} element={<AdminDashboard />} />} />
+        <Route path="/admin-finance" element={<ProtectedRoute access={["admin"]} element={<AdminFinancialDashboard />} />} />
         <Route path="/stock-management" element={<StockPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -134,7 +158,7 @@ function App() {
         <Route path="/diseases-admin" element={<DiseasesAdmin />} />
         <Route path="/knowledge-hub" element={<KnowledgeHub />} />
         {/* <Route path="/farmer-home" element={<FarmerHome />} /> */}
-        <Route path="/farmer-home" element={<ProtectedRoute element={<FarmerHome />} />} />
+        <Route path="/farmer-home" element={<ProtectedRoute access={["farmer"]} element={<FarmerHome />} />} />
         <Route path="/admin-home" element={<AdminHome />} />
 
       </Routes>

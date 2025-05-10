@@ -6,30 +6,28 @@ const getSales = async (req, res) => {
     const { farmerId, cropType, startDate, endDate, region } = req.query;
     let filter = {};
 
-    if (farmerId && farmerId !== 'all') {
-      filter.farmerId = farmerId;
-    }
+    // if (farmerId && farmerId !== 'all') {
+    //   filter.farmerId = farmerId;
+    // }
 
-    if (cropType && cropType !== 'all') {
-      filter.cropType = cropType;
-    }
+    // if (cropType && cropType !== 'all') {
+    //   filter.cropType = cropType;
+    // }
 
-    if (startDate && endDate) {
-      filter.date = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate)
-      };
-    }
+    // if (startDate && endDate) {
+    //   filter.date = {
+    //     $gte: new Date(startDate),
+    //     $lte: new Date(endDate)
+    //   };
+    // }
 
-    if (region && region !== 'all') {
-      const farmersInRegion = await Farmer.find({ region }).select('_id');
-      const farmerIds = farmersInRegion.map(f => f._id);
-      filter.farmerId = { $in: farmerIds };
-    }
+    // if (region && region !== 'all') {
+    //   const farmersInRegion = await Farmer.find({ region }).select('_id');
+    //   const farmerIds = farmersInRegion.map(f => f._id);
+    //   filter.farmerId = { $in: farmerIds };
+    // }
 
-    const sales = await Sales.find(filter)
-      .populate('farmerId', 'name region')
-      .sort({ date: -1 });
+    const sales = await Sales.find();
 
     res.status(200).json(sales);
   } catch (error) {

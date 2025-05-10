@@ -10,19 +10,19 @@ const {
 } = require('../controllers/adminSalesController');
 
 const {
-  getExpenses,
+  getExpensesByUser,
   createExpense,
   updateExpense,
   deleteExpense,
-  getExpensesSummary
-} = require('../controllers/adminExpensesController');
+  getExpensesSummary,
+  getAllExpenses
+} = require('../controllers/expensesController');
 
 const {
-  getFarmers,
-  createFarmer,
   updateFarmer,
   deleteFarmer,
-  getFarmerStats
+  getFarmerStats,
+  getAllFarmers
 } = require('../controllers/adminFarmersController');
 
 const {
@@ -30,6 +30,7 @@ const {
   getCropWiseProfits,
   getRegionalProfits
 } = require('../controllers/adminProfitsController');
+const { getById } = require('../controllers/authController');
 
 // Sales routes
 router.get('/sales', getSales);
@@ -39,15 +40,15 @@ router.delete('/sales/:id', deleteSale);
 router.get('/sales/summary', getSalesSummary);
 
 // Expenses routes
-router.get('/expenses', getExpenses);
+router.get('/expenses/:user', getExpensesByUser);
+router.get('/expenses', getAllExpenses);
 router.post('/expenses', createExpense);
 router.put('/expenses/:id', updateExpense);
 router.delete('/expenses/:id', deleteExpense);
 router.get('/expenses/summary', getExpensesSummary);
 
 // Farmers routes
-router.get('/farmers', getFarmers);
-router.post('/farmers', createFarmer);
+router.get('/farmers', getAllFarmers);
 router.put('/farmers/:id', updateFarmer);
 router.delete('/farmers/:id', deleteFarmer);
 router.get('/farmers/:farmerId/stats', getFarmerStats);
@@ -57,5 +58,8 @@ router.get('/farmers/:farmerId/stats', getFarmerStats);
 router.get('/profits/system', getSystemProfits);
 router.get('/profits/crops', getCropWiseProfits);
 router.get('/profits/regions', getRegionalProfits);
+
+// User routes
+router.get('/users/:id', getById);
 
 module.exports = router;

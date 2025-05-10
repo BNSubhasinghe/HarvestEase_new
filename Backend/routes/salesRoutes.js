@@ -5,7 +5,7 @@ const { getSalesByUserId, createSale, updateSale, deleteSale } = require('../con
 const router = express.Router();
 
 
-// router.get('/', getSales);
+//router.get('/', getSales);
 
 router.get('/:user', getSalesByUserId);
 

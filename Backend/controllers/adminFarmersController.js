@@ -1,40 +1,47 @@
 const Farmer = require('../models/farmerModel');
 const Sales = require('../models/salesModel');
 const Expenses = require('../models/expensesModel');
+const User = require('../models/UserModel');
 
-const getFarmers = async (req, res) => {
+
+//TODO:  write method to get all users whitch is role as farmers
+
+const getAllFarmers = async (req, res) => {
   try {
-    const { region, status } = req.query;
-    let filter = {};
-
-    if (region && region !== 'all') {
-      filter.region = region;
-    }
-
-    if (status && status !== 'all') {
-      filter.status = status;
-    }
-
-    const farmers = await Farmer.find(filter).sort({ name: 1 });
+    let filter = {role: "farmer"};
+    const farmers = await User.find(filter).sort({ name: 1 });
+    console.log("Farmers: ", farmers);
+    
     res.status(200).json(farmers);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-const createFarmer = async (req, res) => {
+
+const getFarmers = async (req, res) => {
   try {
-    const farmer = new Farmer(req.body);
-    await farmer.save();
-    res.status(201).json(farmer);
+    const { region, status } = req.query;
+    let filter = {};
+
+    // if (region && region !== 'all') {
+    //   filter.region = region;
+    // }
+
+    // if (status && status !== 'all') {
+    //   filter.status = status;
+    // }
+
+    const farmers = await Farmer.find().sort({ name: 1 });
+    res.status(200).json(farmers);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
 const updateFarmer = async (req, res) => {
   try {
-    const updatedFarmer = await Farmer.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedFarmer = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.status(200).json(updatedFarmer);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -43,7 +50,7 @@ const updateFarmer = async (req, res) => {
 
 const deleteFarmer = async (req, res) => {
   try {
-    await Farmer.findByIdAndDelete(req.params.id);
+    await User.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: 'Farmer deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -105,8 +112,7 @@ const getFarmerStats = async (req, res) => {
 };
 
 module.exports = {
-  getFarmers,
-  createFarmer,
+  getAllFarmers,
   updateFarmer,
   deleteFarmer,
   getFarmerStats

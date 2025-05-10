@@ -48,6 +48,11 @@ const FarmerHeader = () => {
     };
   }, []);
 
+  // handle nav link item visiblity according to the user role
+  const hasRoleAccess = (access) => {
+    return (access.includes(currentUser?.role))
+  }
+
   return (
     <header className="bg-green-800 p-4 flex justify-between items-center relative z-[99]">
       <div className="flex items-center space-x-2">
@@ -60,7 +65,7 @@ const FarmerHeader = () => {
           <Link to="/service" className="hover:text-yellow-300">Service</Link>
           <Link to="/about" className="hover:text-yellow-300">About</Link>
           <Link to="/crop-landing" className="hover:text-yellow-300">Crop</Link>
-          <Link to="/finance" className="hover:text-yellow-300">Finance</Link>
+          {hasRoleAccess(["farmer", "admin"]) && (<Link to="/finance" className="hover:text-yellow-300">Finance</Link>)}
           
 
           {/* Stock Dropdown */}

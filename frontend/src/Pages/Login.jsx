@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Button } from "antd";
+import { FaUserLock } from "react-icons/fa";
 
 const Login = () => {
   const { login } = useAuth();
@@ -26,7 +28,7 @@ const Login = () => {
     try {
       await login(form);
       const role = JSON.parse(localStorage.getItem("user"))?.role;
-      if (role === "admin") navigate("/admin-home");
+      if (role === "admin") navigate("/admin-dashboard");
       else if (role === "farmer") navigate("/farmer-home"); // Changed to home page
       else if (role === "buyer") navigate("/shop"); // Changed to shop page
       else navigate("/");

@@ -1,5 +1,6 @@
 const Expenses = require('../models/expensesModel');
 const Farmer = require('../models/farmerModel');
+const User = require('../models/UserModel'); // Ensure User model is imported
 
 const getExpenses = async (req, res) => {
   try {
@@ -142,10 +143,28 @@ const getExpensesSummary = async (req, res) => {
   }
 };
 
+const getExpensesByFarmers = async (req, res) => {
+  try {
+    // Find all users with the role "farmer"
+    const farmers = await User.find({ role: 'farmer' }).select('_id');
+    const farmerIds = farmers.map(farmer => farmer._id);
+
+    // Fetch expenses for these farmers
+    const expenses = await Expenses.find({ user: { $in: farmerIds } })
+      .populate('user', 'name') // Populate user details
+      .sort({ date: -1 });
+
+    res.status(200).json(expenses);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getExpenses,
   createExpense,
   updateExpense,
   deleteExpense,
-  getExpensesSummary
+  getExpensesSummary,
+  getExpensesByFarmers // Added new method to exports
 };

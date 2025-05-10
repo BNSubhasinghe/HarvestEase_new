@@ -321,21 +321,24 @@ export default function AdminFinancialDashboard() {
     ];
   };
 
+  const getCurrentUserId = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return user ? user._id : null;
+  };
+
   const fetchData = async () => {
-  setLoading(true);
-  try {
-    const [salesResponse, expensesResponse, farmersResponse] = await Promise.all([
-      fetch('http://localhost:5000/api/admin/sales'),
-      fetch('http://localhost:5000/api/admin/expenses'),
-      fetch('http://localhost:5000/api/admin/farmers')
-        .then(async res => {
-          if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.message || 'Failed to fetch farmers');
-          }
-          return res.json();
-        })
-    ]);
+    setLoading(true);
+    try {
+      const [salesResponse, expensesResponse, farmersResponse] = await Promise.all([
+        fetch('http://localhost:5000/api/admin/sales').then(res => res.json()),
+        fetch(`http://localhost:5000/api/admin/expenses`).then(res => res.json()),
+        fetch('http://localhost:5000/api/admin/farmers').then(res => res.json())
+      ]);
+
+      setSales(Array.isArray(salesResponse) ? salesResponse : []);
+      setExpenses(Array.isArray(expensesResponse) ? expensesResponse : []);
+      setFarmers(Array.isArray(farmersResponse) ? farmersResponse : []);
+
 
       let filteredSales = Array.isArray(salesResponse) ? salesResponse : [];
       let filteredExpenses = Array.isArray(expensesResponse) ? expensesResponse : [];
@@ -403,7 +406,7 @@ export default function AdminFinancialDashboard() {
 
     } catch (error) {
       console.error('Error fetching data:', error);
-      message.error(error.message || 'Failed to load data');
+      message.error('Failed to load data');
     } finally {
       setLoading(false);
     }
@@ -671,7 +674,7 @@ export default function AdminFinancialDashboard() {
     try {
       const url = editFarmer ? `http://localhost:5000/api/admin/farmers/${editFarmer._id}` : 'http://localhost:5000/api/admin/farmers';
       const method = editFarmer ? 'PUT' : 'POST';
-  
+
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -746,7 +749,7 @@ export default function AdminFinancialDashboard() {
   const salesColumns = [
     { 
       title: 'Farmer', 
-      dataIndex: 'farmerId', 
+      dataIndex: 'user', 
       key: 'farmer',
       render: (id) => {
         const farmer = farmers.find(f => f._id === id);
@@ -779,11 +782,11 @@ export default function AdminFinancialDashboard() {
   const expensesColumns = [
     { 
       title: 'Farmer', 
-      dataIndex: 'farmerId', 
-      key: 'farmer',
+      dataIndex: 'user', 
+      key: 'user',
       render: (id) => {
         const farmer = farmers.find(f => f._id === id);
-        return farmer ? farmer.name : 'Unknown';
+        return farmer ? farmer?.name : 'Unknown';
       }
     },
     { title: 'Category', dataIndex: 'category', key: 'category', render: (text) => <Tag color="blue">{text}</Tag> },
@@ -822,18 +825,7 @@ export default function AdminFinancialDashboard() {
         </div>
       )
     },
-    { 
-      title: 'Status', 
-      dataIndex: 'status', 
-      key: 'status',
-      render: (text) => (
-        <Tag color={text === 'active' ? 'green' : 'red'} className="capitalize">
-          {text}
-        </Tag>
-      )
-    },
-    { title: 'Region', dataIndex: 'region', key: 'region' },
-    { title: 'Contact', dataIndex: 'contact', key: 'contact' },
+    { title: 'Email', dataIndex: 'email', key: 'email' }, // Added email column
     { title: 'Joined', dataIndex: 'createdAt', key: 'createdAt', render: (date) => dayjs(date).format('YYYY-MM-DD') },
     {
       title: 'Actions', key: 'actions', render: (_, record) => (
@@ -1811,31 +1803,26 @@ export default function AdminFinancialDashboard() {
           >
             <Input placeholder="Full name" />
           </Form.Item>
-          
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="region"
-                label="Region"
-                rules={[{ required: true, message: 'Please select region' }]}
-              >
-                <Select placeholder="Select region">
-                  {regions.map(region => (
-                    <Option key={region} value={region}>{region}</Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="contact"
-                label="Contact"
-                rules={[{ required: true, message: 'Please enter contact info' }]}
-              >
-                <Input placeholder="Phone number" />
-              </Form.Item>
-            </Col>
-          </Row>
+
+          <Form.Item
+            name="email"
+            label="Email Address"
+            rules={[{ required: true, message: 'Please enter valid email address' }]}
+          >
+            <Input placeholder="Email Address" />
+          </Form.Item>
+
+          <Form.Item
+            name="role"
+            label="Role"
+            rules={[{ required: true, message: 'Please select role' }]}
+          >
+            <Select disabled placeholder="Select role">
+              {["farmer"].map(role => (
+                <Option key={role} value={role}>{role}</Option>
+              ))}
+            </Select>
+          </Form.Item>
           
           <Form.Item
             name="status"
