@@ -16,6 +16,9 @@ const reportRouter = require('./routes/reportRoutes');
 const userRouter = require('./routes/userRoutes');  
 const stockRoutes = require('./routes/stockRoutes');
 const diseaseRouter = require('./routes/diseaseRoute');//mayomi
+const postRoutes = require('./routes/postRoutes'); //mayomi
+const path = require('path');
+const fs = require('fs');
 
 
 const app = express();
@@ -26,8 +29,14 @@ console.log("Plant API Key:", process.env.PLANT_API_KEY);//mayomi
 app.use(cors());
 app.use(express.json());
 
+// Create uploads directory if it doesn't exist
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
 // Serve static files from uploads directory
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Set up routes
 app.use("/crops", cropRouter);
@@ -37,6 +46,7 @@ app.use("/api/report", reportRouter);
 app.use("/api/users", userRouter);
 app.use('/api', stockRoutes);
 app.use("/api/diseases", diseaseRouter);//mayomi
+app.use("/api/posts", postRoutes); //mayomi
 
 
 // MongoDB connection 
