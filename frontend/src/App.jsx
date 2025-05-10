@@ -47,10 +47,6 @@ import { Navigate } from 'react-router-dom';
 
 import './App.css';
 
-import NotAuthorized from "./Pages/NotAuthorized";
-import PrivateRoute from "./Components/PrivateRoute";
-
-
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -123,7 +119,7 @@ function App() {
             {/* relavant Home Page */}
             <Route path="/" element={handleNavigation({ page: "home", element: <Home /> })} />
 
-            {/* ✅ Crop Module */}
+            {/* Crop Module */}
             <Route path="/crop-landing" element={<CropLanding />} />
             <Route path="/crop-form" element={<CropForm />} />
             <Route path="/crop-table" element={<CropTable />} />
@@ -134,7 +130,7 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/not-authorized" element={<NotAuthorized />} />
 
-            {/* ✅ Crop Detail Pages */}
+            {/* Crop Detail Pages */}
             <Route path="/crop-detail/nadu" element={<NaduDetail />} />
             <Route path="/crop-detail/samba" element={<SambaDetail />} />
             <Route path="/crop-detail/redrice" element={<RedRiceDetail />} />

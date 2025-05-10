@@ -28,26 +28,70 @@ function DiseasesOverlay({ onClose }) {
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append('image', selectedImage);
+      // Convert image to base64
+      const base64Image = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(selectedImage);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+      });
 
-      // First, upload the image to your backend
-      const uploadResponse = await axios.post('http://localhost:5000/api/diseases/upload', formData, {
+      // Make request to Plant.id API
+      const apiResponse = await axios({
+        method: 'post',
+        url: 'https://crop.kindwise.com/api/v1/identification',
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
+          'Api-Key': 'NGXBHMAex01ipHhfvocubcTZOQtf9Oi6b6FLyq1H2YcrEfPp3l'
         },
+        data: {
+          images: [base64Image],
+          latitude: 7.8731,  // Sri Lanka's approximate latitude
+          longitude: 80.7718, // Sri Lanka's approximate longitude
+          similar_images: true
+        }
       });
 
-      // Then, use the uploaded image URL to get disease detection results
-      const apiResponse = await axios.post('https://crop.kindwise.com/api/v1', {
-        image: uploadResponse.data.imageUrl,
-        api_key: process.env.REACT_APP_PLANT_API_KEY
-      });
+      console.log('API Response:', apiResponse.data); // Add detailed logging
 
-      setApiResults(apiResponse.data);
+      if (apiResponse.data) {
+        // Check if the response has the expected structure
+        const diseases =
+          apiResponse.data.diseases ||
+          apiResponse.data.health_assessment?.diseases ||
+          apiResponse.data.result?.disease?.suggestions ||
+          [];
+        const transformedResults = {
+          diseases: diseases.map(disease => ({
+            name: disease.name || 'Unknown Disease',
+            confidence: disease.probability || disease.confidence || 0,
+            description: disease.description || 'No description available',
+            treatment: disease.treatment
+              ? (typeof disease.treatment === 'object'
+                  ? Object.values(disease.treatment).join(' | ')
+                  : disease.treatment)
+              : 'No treatment information available'
+          }))
+        };
+        setApiResults(transformedResults);
+        
+        if (diseases.length === 0) {
+          setError('No diseases detected in the image. Please try with a clearer image of the affected area.');
+        }
+      } else {
+        throw new Error('Invalid response format from API');
+      }
     } catch (err) {
-      setError('Error processing image. Please try again.');
-      console.error('Error:', err);
+      console.error('Error details:', err.response?.data || err.message);
+      if (err.response?.status === 401) {
+        setError('API Key authentication failed. Please check if the API key is valid.');
+      } else if (err.response?.status === 429) {
+        setError('API rate limit exceeded. Please try again later.');
+      } else if (err.response?.status === 404) {
+        setError('API endpoint not found. Please check the API configuration.');
+      } else {
+        setError('Error processing image. Please try again with a clearer image of the disease symptoms.');
+      }
     } finally {
       setLoading(false);
     }
@@ -84,7 +128,7 @@ function DiseasesOverlay({ onClose }) {
                 <img
                   src={previewUrl}
                   alt="Preview"
-                  className="max-h-48 rounded-lg mb-4"
+                  className="max-h-48 rounded-lg mb-4 object-contain"
                 />
               ) : (
                 <FaUpload size={48} className="text-gray-400 mb-4" />
@@ -118,23 +162,34 @@ function DiseasesOverlay({ onClose }) {
 
           {/* Error Message */}
           {error && (
-            <div className="text-red-600 text-center">{error}</div>
+            <div className="text-red-600 text-center p-3 bg-red-50 rounded-lg">
+              {error}
+            </div>
           )}
 
           {/* API Results */}
-          {apiResults && (
+          {apiResults && apiResults.diseases.length > 0 && (
             <div className="mt-6">
               <h3 className="text-xl font-semibold mb-4">Detection Results</h3>
               <div className="space-y-4">
-                {apiResults.diseases?.map((disease, index) => (
-                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-medium">{disease.name}</h4>
-                    <p className="text-sm text-gray-600">
+                {apiResults.diseases.map((disease, index) => (
+                  <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h4 className="font-medium text-lg text-green-800">{disease.name}</h4>
+                    <p className="text-sm text-gray-600 mb-2">
                       Confidence: {(disease.confidence * 100).toFixed(2)}%
                     </p>
-                    <p className="text-sm text-gray-600">
-                      Description: {disease.description}
-                    </p>
+                    {disease.description && (
+                      <div className="mb-2">
+                        <p className="font-medium">Description:</p>
+                        <p className="text-sm text-gray-700">{disease.description}</p>
+                      </div>
+                    )}
+                    {disease.treatment && (
+                      <div>
+                        <p className="font-medium">Treatment:</p>
+                        <p className="text-sm text-gray-700">{disease.treatment}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
