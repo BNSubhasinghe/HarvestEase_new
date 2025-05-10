@@ -25,6 +25,19 @@ import CropTrackingDetail from './Pages/CropTrackingDetail';
 import HarvestStockDetail from './Pages/HarvestStockDetail';
 import CostTrackingDetail from './Pages/CostTrackingDetail';
 import SmartPlantCareDetail from './Pages/SmartPlantCareDetail';
+import FinancialDashboard from './Pages/FinancialDashboard';
+import Dashboard from './Pages/Dashboard'; // Path to the Dashboard component
+import LoginPage from './Pages/user/LoginPage'; // Path to the Login page
+import RegisterPage from './Pages/user/RegisterPage'; // Path to the Register page
+import StockPage from './Pages/StockManage/StockPage'; // kasuni
+import ShopPage from './Pages/StockManage/ShopPage'; // kasuni
+import ShopDetailPage from './Pages/StockManage/ShopDetailPage';
+import CartPage from './Pages/StockManage/CartPage'; // kasuni
+import NaduStockDetail from './Pages/StockManage/NaduStockDetail';   // kasuni
+import DiseaseUser from './Pages/DiseaseUser';
+import DiseasesAdmin from './Pages/DiseasesAdmin';
+import KnowledgeHub from './Pages/KnowleadgeHub';
+import './App.css';
 
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
@@ -52,6 +65,29 @@ function App() {
   return (
     <>
       <Header />
+
+      <Routes>
+        <Route path="/" element={<CropLanding />} />
+        <Route path="/crop-form" element={<CropForm />} />
+        <Route path="/crop-table" element={<CropTable />} />
+        <Route path="/crop-update/:id" element={<CropUpdate />} />
+        <Route path="/crop-chart" element={<CropChart />} />
+        <Route path="/crop-planning" element={<CropPlanning />} />
+        <Route path="/crop-detail/nadu" element={<NaduDetail />} />
+        <Route path="/crop-detail/samba" element={<SambaDetail />} />
+        <Route path="/crop-detail/redrice" element={<RedRiceDetail />} />
+        <Route path="/crop-detail/bg352" element={<Bg352Detail />} />
+        <Route path="/crop-detail/suwandel" element={<SuwandelDetail />} />
+        <Route path="/finance" element={<FinancialDashboard />} />
+
+        {/* kasuni */}
+        <Route path="/stock-management" element={<StockPage />} />
+        <Route path="/shop" element={<ShopPage />} /> 
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/shop-detail/:id" element={<ShopDetailPage />} />
+        <Route path="/nadu-stock-detail" element={<NaduStockDetail />} />
+
+
       <div className="flex">
         {showCropSidebar && <CropSidebar />}
 
