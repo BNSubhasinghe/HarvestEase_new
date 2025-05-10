@@ -1,8 +1,112 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaEye, FaFilePdf } from 'react-icons/fa';
+import { Document, Page, Text, View, StyleSheet, Image, PDFDownloadLink } from '@react-pdf/renderer';
+import { format } from 'date-fns';
 import axios from 'axios';
 import DiseaseView from './DiseaseView';
 import sharedBg from '../assets/shared_bg.png';
+import logo from '../assets/Yellow Vintage Wheat Rice Oats logo.png';
+
+// Create PDF styles
+const pdfStyles = StyleSheet.create({
+  page: {
+    padding: 30,
+  },
+  header: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  logo: {
+    width: 50,
+    height: 50,
+    marginRight: 10,
+  },
+  title: {
+    fontSize: 24,
+    marginLeft: 10,
+  },
+  reportInfo: {
+    marginBottom: 20,
+  },
+  infoText: {
+    fontSize: 12,
+    marginBottom: 5,
+  },
+  table: {
+    display: 'table',
+    width: '100%',
+    marginTop: 10,
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: '#bfbfbf',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#bfbfbf',
+  },
+  tableHeader: {
+    backgroundColor: '#f0f0f0',
+  },
+  tableCell: {
+    padding: 8,
+    fontSize: 12,
+  },
+  indexCell: {
+    width: '15%',
+    borderRightWidth: 1,
+    borderRightColor: '#bfbfbf',
+  },
+  nameCell: {
+    width: '85%',
+  },
+});
+
+// PDF Document Component
+const DiseaseListPDF = ({ diseases }) => {
+  const currentDate = format(new Date(), 'yyyy-MM-dd HH:mm a');
+  
+  return (
+    <Document>
+      <Page size="A4" style={pdfStyles.page}>
+        {/* Header with Logo */}
+        <View style={pdfStyles.header}>
+          <Image style={pdfStyles.logo} src={logo} />
+          <Text style={pdfStyles.title}>HarvestEase - Names of Diseases</Text>
+        </View>
+
+        {/* Report Information */}
+        <View style={pdfStyles.reportInfo}>
+          <Text style={pdfStyles.infoText}>Report Generated: {currentDate}</Text>
+          <Text style={pdfStyles.infoText}>Total Diseases: {diseases.length}</Text>
+        </View>
+
+        {/* Table Header */}
+        <View style={[pdfStyles.tableRow, pdfStyles.tableHeader]}>
+          <View style={[pdfStyles.tableCell, pdfStyles.indexCell]}>
+            <Text>No.</Text>
+          </View>
+          <View style={[pdfStyles.tableCell, pdfStyles.nameCell]}>
+            <Text>Disease Name</Text>
+          </View>
+        </View>
+
+        {/* Table Content */}
+        {diseases.map((disease, index) => (
+          <View key={disease._id} style={pdfStyles.tableRow}>
+            <View style={[pdfStyles.tableCell, pdfStyles.indexCell]}>
+              <Text>{index + 1}</Text>
+            </View>
+            <View style={[pdfStyles.tableCell, pdfStyles.nameCell]}>
+              <Text>{disease.diseaseName}</Text>
+            </View>
+          </View>
+        ))}
+      </Page>
+    </Document>
+  );
+};
 
 function DiseasesAdmin() {
   const [diseases, setDiseases] = useState([]);
@@ -475,12 +579,30 @@ function DiseasesAdmin() {
       <div className="max-w-6xl mx-auto relative">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-green-800">Disease Management</h2>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition-colors"
-          >
-            <FaPlus /> Add New Disease
-          </button>
+          <div className="flex gap-4">
+            {diseases.length > 0 && (
+              <PDFDownloadLink
+                document={<DiseaseListPDF diseases={diseases} />}
+                fileName={`disease-list-${format(new Date(), 'yyyy-MM-dd')}.pdf`}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-red-700 transition-colors"
+              >
+                {({ blob, url, loading, error }) =>
+                  loading ? 'Loading document...' : (
+                    <>
+                      <FaFilePdf />
+                      Download PDF
+                    </>
+                  )
+                }
+              </PDFDownloadLink>
+            )}
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition-colors"
+            >
+              <FaPlus /> Add New Disease
+            </button>
+          </div>
         </div>
 
         {/* Search Bar */}
