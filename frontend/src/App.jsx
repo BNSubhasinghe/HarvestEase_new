@@ -33,6 +33,11 @@ import ShopPage from './Pages/StockManage/ShopPage'; // kasuni
 import ShopDetailPage from './Pages/StockManage/ShopDetailPage';
 import CartPage from './Pages/StockManage/CartPage'; // kasuni
 import NaduStockDetail from './Pages/StockManage/NaduStockDetail';   // kasuni
+import SambaStockDetail from './Pages/StockManage/SambaStockDetail';
+import Bg352StockDetail from './Pages/StockManage/BG352StockDetail'; // kasuni
+import SuwandelStockDetail from './Pages/StockManage/SuwandelStockDetail'; // kasuni
+import RedRiceStockDetail from './Pages/StockManage/RedRiceStockDetail'; // kasuni // kasuni
+import PachchaStockDetail from './Pages/StockManage/PachchaStockDetail'; // kasuni
 import DiseaseUser from './Pages/DiseaseUser';
 import DiseasesAdmin from './Pages/DiseasesAdmin';
 import KnowledgeHub from './Pages/KnowleadgeHub';
@@ -47,9 +52,13 @@ import { Navigate } from 'react-router-dom';
 
 import './App.css';
 
+import NotAuthorized from "./Pages/NotAuthorized";
+import PrivateRoute from "./Components/PrivateRoute";
+
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
+
 
   const cropSidebarRoutes = [
     '/crop-form',
@@ -111,7 +120,6 @@ function App() {
     <>
       <Header />
 
-
       <div className="flex">
         {showCropSidebar && <CropSidebar />}
         <div className="flex-1 p-4">
@@ -138,11 +146,18 @@ function App() {
             <Route path="/crop-detail/suwandel" element={<SuwandelDetail />} />
             <Route path="/crop-detail/pachchaperumal" element={<PachchaDetail />} />
 
+
             {/* ✅ Other Pages */}
+
             <Route path="/services/crop-tracking" element={<CropTrackingDetail />} />
             <Route path="/services/harvest-stock" element={<HarvestStockDetail />} />
             <Route path="/services/cost-tracking" element={<CostTrackingDetail />} />
             <Route path="/services/smart-plant" element={<SmartPlantCareDetail />} />
+            <Route path="/samba-stock-detail" element={<SambaStockDetail />} />
+            <Route path="/pachcha-stock-detail" element={<PachchaStockDetail />} />
+           <Route path="/redrice-stock-detail" element={<RedRiceStockDetail />} />
+            <Route path="/bg352-stock-detail" element={<Bg352StockDetail />} />
+            <Route path="/suwandel-stock-detail" element={<SuwandelStockDetail />} />
           
           {/* Protected Dashboards */}
             <Route
@@ -153,7 +168,7 @@ function App() {
                 </PrivateRoute>
               }
             />
-          
+      
           </Routes>
 
         </div>
@@ -183,7 +198,7 @@ function App() {
             <Route path="/nadu-stock-detail" element={<NaduStockDetail />} />
                 
                 
-              </Routes>
+         </Routes>
     </>
   );
 }
