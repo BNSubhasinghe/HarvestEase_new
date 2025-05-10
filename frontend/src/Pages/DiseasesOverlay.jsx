@@ -39,7 +39,7 @@ function DiseasesOverlay({ onClose }) {
       // Make request to Plant.id API
       const apiResponse = await axios({
         method: 'post',
-        url: 'https://api.crop.kindwise.com/api/v1/health_assessment',
+        url: 'https://crop.kindwise.com/api/v1/identification',
         headers: {
           'Content-Type': 'application/json',
           'Api-Key': 'NGXBHMAex01ipHhfvocubcTZOQtf9Oi6b6FLyq1H2YcrEfPp3l'
@@ -52,14 +52,25 @@ function DiseasesOverlay({ onClose }) {
         }
       });
 
-      if (apiResponse.data && apiResponse.data.health_assessment) {
-        const diseases = apiResponse.data.health_assessment.diseases || [];
+      console.log('API Response:', apiResponse.data); // Add detailed logging
+
+      if (apiResponse.data) {
+        // Check if the response has the expected structure
+        const diseases =
+          apiResponse.data.diseases ||
+          apiResponse.data.health_assessment?.diseases ||
+          apiResponse.data.result?.disease?.suggestions ||
+          [];
         const transformedResults = {
           diseases: diseases.map(disease => ({
             name: disease.name || 'Unknown Disease',
-            confidence: disease.probability || 0,
+            confidence: disease.probability || disease.confidence || 0,
             description: disease.description || 'No description available',
-            treatment: disease.treatment || 'No treatment information available'
+            treatment: disease.treatment
+              ? (typeof disease.treatment === 'object'
+                  ? Object.values(disease.treatment).join(' | ')
+                  : disease.treatment)
+              : 'No treatment information available'
           }))
         };
         setApiResults(transformedResults);
