@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "@react-pdf/renderer": "^4.3.0",
-    "date-fns": "^4.1.0"
-  }
-}
