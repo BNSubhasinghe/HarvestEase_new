@@ -45,7 +45,7 @@ const StockDetailPage = () => {
   
   const variety = getVarietyFromFileName();
 
-  // Fetch stock data from backend
+  // Fetch stock data and initialize cart
   useEffect(() => {
     const fetchStocks = async () => {
       try {
@@ -62,6 +62,10 @@ const StockDetailPage = () => {
     };
 
     fetchStocks();
+    
+    // Load cart from localStorage
+    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCart(storedCart);
   }, []);
 
   // Add click outside modal to close
@@ -151,9 +155,34 @@ const StockDetailPage = () => {
 
   const handleAddToCart = (stock) => {
     const quantity = selectedQuantity || 1;
-    const itemToAdd = { ...stock, purchaseQuantity: quantity };
     
-    setCart((prevCart) => [...prevCart, itemToAdd]);
+    // Get current cart from localStorage
+    const currentCart = JSON.parse(localStorage.getItem("cart") || "[]");
+    
+    // Check if item already exists in cart
+    const existingItemIndex = currentCart.findIndex(item => item._id === stock._id);
+    
+    if (existingItemIndex >= 0) {
+      // Update existing item quantity
+      currentCart[existingItemIndex].quantity += quantity;
+    } else {
+      // Add new item to cart
+      currentCart.push({
+        _id: stock._id,
+        variety: stock.variety,
+        cropType: stock.cropType,
+        price: stock.price,
+        quantity: quantity,
+        quantityUnit: stock.quantityUnit,
+        image: getProductImage(stock.variety)
+      });
+    }
+    
+    // Save updated cart to localStorage
+    localStorage.setItem("cart", JSON.stringify(currentCart));
+    
+    // Update component state
+    setCart(currentCart);
     
     // Show notification
     setNotification({
@@ -346,6 +375,24 @@ const StockDetailPage = () => {
                 </motion.div>
               </AnimatePresence>
             )}
+          </div>
+
+          <div className="flex items-center">
+            {/* Cart Indicator */}
+            <a 
+              href="/cart" 
+              className="ml-4 relative group bg-white p-3 rounded-full shadow-sm hover:shadow-md transition-all duration-300"
+            >
+              <FaShoppingCart className="text-green-600 text-xl" />
+              {cart.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                  {cart.reduce((total, item) => total + 1, 0)}
+                </span>
+              )}
+              <span className="absolute opacity-0 group-hover:opacity-100 -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap transition-opacity duration-300">
+                View Cart
+              </span>
+            </a>
           </div>
         </div>
         

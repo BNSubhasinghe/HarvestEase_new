@@ -4,21 +4,28 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   FaShoppingCart, FaLeaf, FaInfo, FaTimes, 
   FaStar, FaChevronRight, FaMapMarkerAlt,
-  FaRulerHorizontal, FaTint, FaTemperatureHigh 
+  FaRulerHorizontal, FaTint, FaTemperatureHigh,
+  FaSearch
 } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
-const ShopPage = () => {
+const RedRiceStockDetail = () => {
   const [stocks, setStocks] = useState([]);
   const [cart, setCart] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState(null);
-  const [filter, setFilter] = useState("Rice"); // Filter for Rice or Paddy
+  const [filter, setFilter] = useState("Rice");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState(null);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   
   const modalRef = useRef();
+  const searchRef = useRef();
+  const currentVariety = "Red Rice";
 
   // Fetch stock data from backend
   useEffect(() => {
@@ -37,7 +44,28 @@ const ShopPage = () => {
     };
 
     fetchStocks();
+    
+    // Load cart from localStorage
+    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCart(storedCart);
   }, []);
+
+  // Handle search input changes
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setSearchResults([]);
+      return;
+    }
+
+    const term = searchTerm.toLowerCase();
+    const results = stocks.filter(stock => 
+      stock.variety.toLowerCase().includes(term) ||
+      stock.cropType.toLowerCase().includes(term) ||
+      (stock.description && stock.description.toLowerCase().includes(term))
+    );
+
+    setSearchResults(results);
+  }, [searchTerm, stocks]);
 
   // Add click outside modal to close
   useEffect(() => {
@@ -45,20 +73,25 @@ const ShopPage = () => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
         closeModal();
       }
+      
+      // Close search results when clicking outside
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearchResults(false);
+      }
     };
     
-    if (modalOpen) {
+    if (modalOpen || showSearchResults) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [modalOpen]);
+  }, [modalOpen, showSearchResults]);
 
   // Filter stocks based on selected filter and variety
   const filteredStocks = stocks.filter(
-    (stock) => stock.variety === "Red Rice" && stock.cropType.toLowerCase() === filter.toLowerCase()
+    (stock) => stock.variety === currentVariety && stock.cropType.toLowerCase() === filter.toLowerCase()
   );
 
   // Get product image based on variety
@@ -72,7 +105,7 @@ const ShopPage = () => {
       'Suwandel': '/shopImg/suwandel.jpg'
     };
     
-    return varietyMap[variety] || '/shopImg/redrice.jpg'; // Default image if variety not found
+    return varietyMap[variety] || '/shopImg/redrice.jpg';
   };
 
   // Handle quantity change (increase/decrease)
@@ -95,6 +128,7 @@ const ShopPage = () => {
     setSelectedStock(stock);
     setSelectedQuantity(1);
     setModalOpen(true);
+    setShowSearchResults(false);
   };
 
   const closeModal = () => {
@@ -103,9 +137,34 @@ const ShopPage = () => {
 
   const handleAddToCart = (stock) => {
     const quantity = selectedQuantity || 1;
-    const itemToAdd = { ...stock, purchaseQuantity: quantity };
     
-    setCart((prevCart) => [...prevCart, itemToAdd]);
+    // Get current cart from localStorage
+    const currentCart = JSON.parse(localStorage.getItem("cart") || "[]");
+    
+    // Check if item already exists in cart
+    const existingItemIndex = currentCart.findIndex(item => item._id === stock._id);
+    
+    if (existingItemIndex >= 0) {
+      // Update existing item quantity
+      currentCart[existingItemIndex].quantity += quantity;
+    } else {
+      // Add new item to cart
+      currentCart.push({
+        _id: stock._id,
+        variety: stock.variety,
+        cropType: stock.cropType,
+        price: stock.price,
+        quantity: quantity,
+        quantityUnit: stock.quantityUnit,
+        image: getProductImage(stock.variety)
+      });
+    }
+    
+    // Save updated cart to localStorage
+    localStorage.setItem("cart", JSON.stringify(currentCart));
+    
+    // Update component state
+    setCart(currentCart);
     
     // Show notification
     setNotification({
@@ -121,6 +180,18 @@ const ShopPage = () => {
     if (modalOpen) {
       closeModal();
     }
+  };
+
+  // Handle search input
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setShowSearchResults(e.target.value.trim() !== '');
+  };
+
+  // Navigate to variety page from search
+  const navigateToVariety = (stockVariety) => {
+    window.location.href = `/${stockVariety.toLowerCase().replace(' ', '-')}-stock-detail`;
+    setShowSearchResults(false);
   };
 
   // Get variety description based on name
@@ -198,13 +269,95 @@ const ShopPage = () => {
       </AnimatePresence>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <div className="mb-6 flex items-center text-sm text-gray-600">
-          <a href="/shop" className="hover:text-green-600 transition">Shop</a>
-          <FaChevronRight className="mx-2 text-xs" />
-          <a href="#" className="hover:text-green-600 transition">Rice Varieties</a>
-          <FaChevronRight className="mx-2 text-xs" />
-          <span className="text-gray-800 font-medium">Red Rice</span>
+        {/* Top Navigation Section with Search */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+          {/* Breadcrumb */}
+          <div className="mb-4 md:mb-0 flex items-center text-sm text-gray-600">
+            <Link to="/shop" className="hover:text-green-600 transition">Shop</Link>
+            <FaChevronRight className="mx-2 text-xs" />
+            <Link to="/shop" className="hover:text-green-600 transition">Rice Varieties</Link>
+            <FaChevronRight className="mx-2 text-xs" />
+            <span className="text-gray-800 font-medium">{currentVariety}</span>
+          </div>
+          
+          {/* Search Bar */}
+          <div className="relative" ref={searchRef}>
+            <div className="flex items-center bg-white rounded-full border border-gray-300 px-4 py-2 shadow-sm focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500">
+              <FaSearch className="text-gray-400 mr-3" />
+              <input
+                type="text"
+                placeholder="Search varieties, types..."
+                className="border-none focus:outline-none focus:ring-0 w-full bg-transparent"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                onFocus={() => setShowSearchResults(searchTerm.trim() !== '')}
+              />
+            </div>
+            
+            {/* Search Results Dropdown */}
+            {showSearchResults && (
+              <AnimatePresence>
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-80 overflow-y-auto"
+                >
+                  {searchResults.length > 0 ? (
+                    <ul>
+                      {searchResults.map((stock, idx) => (
+                        <li 
+                          key={idx} 
+                          className="hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                          onClick={() => handleViewDetails(stock)}
+                        >
+                          <div className="p-3 flex items-center">
+                            <div className="w-12 h-12 rounded-md mr-3 overflow-hidden flex-shrink-0">
+                              <img src={getProductImage(stock.variety)} alt={stock.variety} className="w-full h-full object-cover" />
+                            </div>
+                            <div>
+                              <div className="font-medium">{stock.variety} {stock.cropType}</div>
+                              <div className="text-sm text-gray-600">Rs. {stock.price}/{stock.quantityUnit}</div>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="p-4 text-center text-gray-500">
+                      No matching products found
+                    </div>
+                  )}
+                  
+                  {searchResults.length > 0 && (
+                    <div className="p-3 border-t border-gray-100 bg-gray-50 text-center text-sm">
+                      <span className="text-gray-500">
+                        Found {searchResults.length} matching products
+                      </span>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            )}
+          </div>
+
+          <div className="flex items-center">
+            {/* Cart Indicator */}
+            <Link 
+              to="/cart" 
+              className="ml-4 relative group bg-white p-3 rounded-full shadow-sm hover:shadow-md transition-all duration-300"
+            >
+              <FaShoppingCart className="text-green-600 text-xl" />
+              {cart.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                  {cart.reduce((total, item) => total + 1, 0)}
+                </span>
+              )}
+              <span className="absolute opacity-0 group-hover:opacity-100 -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap transition-opacity duration-300">
+                View Cart
+              </span>
+            </Link>
+          </div>
         </div>
         
         {/* Hero Section */}
@@ -217,7 +370,7 @@ const ShopPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <h1 className="text-5xl sm:text-6xl font-extrabold mb-4 drop-shadow-lg">Red Rice</h1>
+              <h1 className="text-5xl sm:text-6xl font-extrabold mb-4 drop-shadow-lg">{currentVariety}</h1>
               <p className="text-lg sm:text-xl font-light mb-8">{getVarietyDescription()}</p>
               <div className="flex flex-wrap gap-3">
                 <button 
@@ -261,7 +414,7 @@ const ShopPage = () => {
               <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
                 <FaLeaf className="text-4xl text-green-300" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-700 mb-2">No Red Rice {filter.toLowerCase()} available</h2>
+              <h2 className="text-2xl font-bold text-gray-700 mb-2">No {currentVariety} {filter.toLowerCase()} available</h2>
               <p className="text-gray-600 mb-8">We're currently out of stock of this variety. Check back soon!</p>
               <button
                 onClick={() => setFilter(filter === "Rice" ? "Paddy" : "Rice")}
@@ -276,7 +429,7 @@ const ShopPage = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <h2 className="text-3xl font-bold mb-8 text-center">Available Red Rice {filter}</h2>
+              <h2 className="text-3xl font-bold mb-8 text-center">Available {currentVariety} {filter}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredStocks.map((stock) => (
                   <motion.div
@@ -364,9 +517,9 @@ const ShopPage = () => {
           <h2 className="text-3xl font-bold mb-8 text-center">You Might Also Like</h2>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {['Nadu', 'Samba', 'Pachcha', 'BG352'].map((relatedVariety, idx) => (
-              <a 
-                href={`/${relatedVariety.toLowerCase().replace(' ', '-')}-stock-detail`}
+            {['Nadu', 'Samba', 'Pachcha', 'BG352'].filter(v => v !== currentVariety).slice(0, 4).map((relatedVariety, idx) => (
+              <Link 
+                to={`/${relatedVariety.toLowerCase().replace(' ', '-')}-stock-detail`}
                 key={idx}
                 className="group"
               >
@@ -391,7 +544,7 @@ const ShopPage = () => {
                     <span className="text-green-700 font-semibold">View Products</span>
                   </div>
                 </motion.div>
-              </a>
+              </Link>
             ))}
           </div>
         </section>
@@ -560,4 +713,4 @@ const ShopPage = () => {
   );
 };
 
-export default ShopPage;
+export default RedRiceStockDetail;
