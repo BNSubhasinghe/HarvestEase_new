@@ -6,8 +6,9 @@ import {
   FaStar, FaChevronRight, FaMapMarkerAlt,
   FaRulerHorizontal, FaTint, FaTemperatureHigh 
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
-const ShopPage = () => {
+const BG352StockDetail = () => {
   const [stocks, setStocks] = useState([]);
   const [cart, setCart] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -19,6 +20,8 @@ const ShopPage = () => {
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   
   const modalRef = useRef();
+  const navigate = useNavigate();
+  const currentVariety = "BG352"; // Set the current variety
 
   // Fetch stock data from backend
   useEffect(() => {
@@ -37,7 +40,22 @@ const ShopPage = () => {
     };
 
     fetchStocks();
+    
+    // Load cart from localStorage if available
+    const savedCart = localStorage.getItem('harvestEaseCart');
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (e) {
+        console.error("Error parsing saved cart:", e);
+      }
+    }
   }, []);
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('harvestEaseCart', JSON.stringify(cart));
+  }, [cart]);
 
   // Add click outside modal to close
   useEffect(() => {
@@ -58,7 +76,7 @@ const ShopPage = () => {
 
   // Filter stocks based on selected filter and variety
   const filteredStocks = stocks.filter(
-    (stock) => stock.variety === "BG352" && stock.cropType.toLowerCase() === filter.toLowerCase()
+    (stock) => stock.variety === currentVariety && stock.cropType.toLowerCase() === filter.toLowerCase()
   );
 
   // Get product image based on variety
@@ -103,9 +121,20 @@ const ShopPage = () => {
 
   const handleAddToCart = (stock) => {
     const quantity = selectedQuantity || 1;
-    const itemToAdd = { ...stock, purchaseQuantity: quantity };
     
-    setCart((prevCart) => [...prevCart, itemToAdd]);
+    // Check if item already exists in cart
+    const existingItemIndex = cart.findIndex(item => item._id === stock._id);
+    
+    if (existingItemIndex >= 0) {
+      // Update existing item
+      const updatedCart = [...cart];
+      updatedCart[existingItemIndex].purchaseQuantity += quantity;
+      setCart(updatedCart);
+    } else {
+      // Add new item
+      const itemToAdd = { ...stock, purchaseQuantity: quantity };
+      setCart((prevCart) => [...prevCart, itemToAdd]);
+    }
     
     // Show notification
     setNotification({
@@ -134,34 +163,16 @@ const ShopPage = () => {
   };
 
   const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating || 4.5);
-    const hasHalfStar = (rating || 4.5) - fullStars >= 0.5;
-    
-    // Full stars
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<FaStar key={`star-${i}`} className="text-yellow-400" />);
-    }
-    
-    // Half star
-    if (hasHalfStar) {
-      stars.push(
-        <div key="half-star" className="relative">
-          <FaStar className="text-gray-300" />
-          <div className="absolute top-0 left-0 overflow-hidden w-1/2">
-            <FaStar className="text-yellow-400" />
-          </div>
-        </div>
-      );
-    }
-    
-    // Empty stars
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(<FaStar key={`empty-${i}`} className="text-gray-300" />);
-    }
-    
-    return stars;
+    return (
+      <div className="flex">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <FaStar 
+            key={star}
+            className={star <= Math.floor(rating || 4.5) ? "text-yellow-400" : "text-gray-300"}
+          />
+        ))}
+      </div>
+    );
   };
 
   // Features based on crop type
@@ -179,6 +190,10 @@ const ShopPage = () => {
         { icon: <FaMapMarkerAlt className="text-green-500" />, text: 'Farm Direct' }
       ];
     }
+  };
+
+  const navigateToVariety = (variety) => {
+    navigate(`/${variety.toLowerCase().replace(' ', '-')}-stock-detail`);
   };
 
   return (
@@ -204,7 +219,7 @@ const ShopPage = () => {
           <FaChevronRight className="mx-2 text-xs" />
           <a href="#" className="hover:text-green-600 transition">Rice Varieties</a>
           <FaChevronRight className="mx-2 text-xs" />
-          <span className="text-gray-800 font-medium">BG352</span>
+          <span className="text-gray-800 font-medium">{currentVariety}</span>
         </div>
         
         {/* Hero Section */}
@@ -217,7 +232,7 @@ const ShopPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <h1 className="text-5xl sm:text-6xl font-extrabold mb-4 drop-shadow-lg">BG352</h1>
+              <h1 className="text-5xl sm:text-6xl font-extrabold mb-4 drop-shadow-lg">{currentVariety}</h1>
               <p className="text-lg sm:text-xl font-light mb-8">{getVarietyDescription()}</p>
               <div className="flex flex-wrap gap-3">
                 <button 
@@ -261,7 +276,7 @@ const ShopPage = () => {
               <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
                 <FaLeaf className="text-4xl text-green-300" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-700 mb-2">No BG352 {filter.toLowerCase()} available</h2>
+              <h2 className="text-2xl font-bold text-gray-700 mb-2">No {currentVariety} {filter.toLowerCase()} available</h2>
               <p className="text-gray-600 mb-8">We're currently out of stock of this variety. Check back soon!</p>
               <button
                 onClick={() => setFilter(filter === "Rice" ? "Paddy" : "Rice")}
@@ -276,7 +291,7 @@ const ShopPage = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <h2 className="text-3xl font-bold mb-8 text-center">Available BG352 {filter}</h2>
+              <h2 className="text-3xl font-bold mb-8 text-center">Available {currentVariety} {filter}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredStocks.map((stock) => (
                   <motion.div
@@ -339,6 +354,7 @@ const ShopPage = () => {
                         <button
                           className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-xl font-medium transition shadow-sm hover:shadow flex items-center justify-center"
                           onClick={() => handleAddToCart(stock)}
+                          disabled={stock.quantity <= 0}
                         >
                           <FaShoppingCart className="mr-2" />
                           Add to Cart
@@ -365,10 +381,10 @@ const ShopPage = () => {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {['Nadu', 'Samba', 'Red Rice', 'Pachcha'].map((relatedVariety, idx) => (
-              <a 
-                href={`/${relatedVariety.toLowerCase().replace(' ', '-')}-stock-detail`}
+              <div 
                 key={idx}
-                className="group"
+                onClick={() => navigateToVariety(relatedVariety)}
+                className="group cursor-pointer"
               >
                 <motion.div 
                   whileHover={{ y: -5 }}
@@ -384,3 +400,117 @@ const ShopPage = () => {
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">{relatedVariety}</h3>
                     <div className="flex items-center text-yellow-500 mb-2">
+                      {renderStars(4)}
+                    </div>
+                    <div className="text-green-700 font-medium">
+                      View Details
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {/* Product Detail Modal */}
+      <AnimatePresence>
+        {modalOpen && selectedStock && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              ref={modalRef}
+              className="bg-white rounded-2xl overflow-hidden shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col md:flex-row"
+            >
+              {/* Close button */}
+              <button 
+                onClick={closeModal}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 z-10"
+              >
+                <FaTimes size={24} />
+              </button>
+
+              {/* Product image */}
+              <div className="md:w-1/2 h-72 md:h-auto relative">
+                <img 
+                  src={getProductImage(selectedStock.variety)} 
+                  alt={selectedStock.variety}
+                  className="w-full h-full object-cover" 
+                />
+              </div>
+
+              {/* Product details */}
+              <div className="md:w-1/2 p-6 overflow-y-auto">
+                <div className="mb-4">
+                  <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                    {selectedStock.cropType}
+                  </span>
+                </div>
+                <h2 className="text-3xl font-bold text-gray-800 mb-2">{selectedStock.variety}</h2>
+                <div className="flex items-center mb-4">
+                  {renderStars(4.5)}
+                  <span className="ml-2 text-gray-600 text-sm">(4.5/5)</span>
+                </div>
+
+                <div className="border-t border-gray-100 my-4 pt-4">
+                  <div className="text-green-700 font-bold text-2xl mb-2">
+                    Rs. {selectedStock.price}
+                    <span className="text-sm text-gray-500 font-normal">/{selectedStock.quantityUnit}</span>
+                  </div>
+                  
+                  <p className="text-gray-600 mb-6">
+                    Premium quality {selectedStock.variety} {selectedStock.cropType.toLowerCase()} sourced directly from local farmers.
+                    Carefully processed and packaged to ensure the highest quality.
+                  </p>
+                  
+                  <div className="mb-6">
+                    <h4 className="font-medium text-gray-800 mb-2">Available Stock</h4>
+                    <p className="text-gray-600">{selectedStock.quantity} {selectedStock.quantityUnit}</p>
+                  </div>
+                  
+                  {/* Quantity selector */}
+                  <div className="flex items-center mb-6">
+                    <span className="mr-4 text-gray-700">Quantity:</span>
+                    <div className="flex items-center border border-gray-300 rounded-lg">
+                      <button 
+                        className="px-3 py-1 text-gray-600 hover:bg-gray-100"
+                        onClick={() => handleSelectedQuantityChange(-1)}
+                      >
+                        -
+                      </button>
+                      <span className="px-4 py-1">{selectedQuantity}</span>
+                      <button 
+                        className="px-3 py-1 text-gray-600 hover:bg-gray-100"
+                        onClick={() => handleSelectedQuantityChange(1)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <button
+                    className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-xl font-medium transition shadow-sm hover:shadow flex items-center justify-center"
+                    onClick={() => handleAddToCart(selectedStock)}
+                    disabled={selectedStock.quantity <= 0}
+                  >
+                    <FaShoppingCart className="mr-2" />
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default BG352StockDetail;

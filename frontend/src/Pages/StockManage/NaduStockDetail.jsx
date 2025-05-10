@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   FaShoppingCart, FaLeaf, FaInfo, FaTimes, 
   FaStar, FaChevronRight, FaMapMarkerAlt,
-  FaRulerHorizontal, FaTint, FaTemperatureHigh 
+  FaRulerHorizontal, FaTint, FaTemperatureHigh,
+  FaSearch
 } from "react-icons/fa";
 
 const StockDetailPage = () => {
@@ -17,8 +18,12 @@ const StockDetailPage = () => {
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState(null);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   
   const modalRef = useRef();
+  const searchRef = useRef();
   
   // Determine variety from filename - extract the variety name from the file name
   const getVarietyFromFileName = () => {
@@ -65,16 +70,38 @@ const StockDetailPage = () => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
         closeModal();
       }
+
+      // Close search results when clicking outside
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearchResults(false);
+      }
     };
     
-    if (modalOpen) {
+    if (modalOpen || showSearchResults) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [modalOpen]);
+  }, [modalOpen, showSearchResults]);
+
+  // Handle search
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setSearchResults([]);
+      return;
+    }
+
+    const term = searchTerm.toLowerCase();
+    const results = stocks.filter(stock => 
+      stock.variety.toLowerCase().includes(term) ||
+      stock.cropType.toLowerCase().includes(term) ||
+      (stock.description && stock.description.toLowerCase().includes(term))
+    );
+
+    setSearchResults(results);
+  }, [searchTerm, stocks]);
 
   // Filter stocks based on selected filter and variety
   const filteredStocks = stocks.filter(
@@ -115,6 +142,7 @@ const StockDetailPage = () => {
     setSelectedStock(stock);
     setSelectedQuantity(1);
     setModalOpen(true);
+    setShowSearchResults(false);
   };
 
   const closeModal = () => {
@@ -141,6 +169,18 @@ const StockDetailPage = () => {
     if (modalOpen) {
       closeModal();
     }
+  };
+
+  // Handle search input
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setShowSearchResults(e.target.value.trim() !== '');
+  };
+
+  // Navigate to variety page from search
+  const navigateToVariety = (stockVariety) => {
+    window.location.href = `/${stockVariety.toLowerCase().replace(' ', '-')}-stock-detail`;
+    setShowSearchResults(false);
   };
 
   // Get variety description based on name
@@ -236,13 +276,77 @@ const StockDetailPage = () => {
       </AnimatePresence>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <div className="mb-6 flex items-center text-sm text-gray-600">
-          <a href="/shop" className="hover:text-green-600 transition">Shop</a>
-          <FaChevronRight className="mx-2 text-xs" />
-          <a href="#" className="hover:text-green-600 transition">Rice Varieties</a>
-          <FaChevronRight className="mx-2 text-xs" />
-          <span className="text-gray-800 font-medium">{variety}</span>
+        {/* Top Navigation Section with Search */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+          {/* Breadcrumb */}
+          <div className="mb-4 md:mb-0 flex items-center text-sm text-gray-600">
+            <a href="/shop" className="hover:text-green-600 transition">Shop</a>
+            <FaChevronRight className="mx-2 text-xs" />
+            <a href="#" className="hover:text-green-600 transition">Rice Varieties</a>
+            <FaChevronRight className="mx-2 text-xs" />
+            <span className="text-gray-800 font-medium">{variety}</span>
+          </div>
+          
+          {/* Search Bar */}
+          <div className="relative" ref={searchRef}>
+            <div className="flex items-center bg-white rounded-full border border-gray-300 px-4 py-2 shadow-sm focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500">
+              <FaSearch className="text-gray-400 mr-3" />
+              <input
+                type="text"
+                placeholder="Search varieties, types..."
+                className="border-none focus:outline-none focus:ring-0 w-full bg-transparent"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                onFocus={() => setShowSearchResults(searchTerm.trim() !== '')}
+              />
+            </div>
+            
+            {/* Search Results Dropdown */}
+            {showSearchResults && (
+              <AnimatePresence>
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-80 overflow-y-auto"
+                >
+                  {searchResults.length > 0 ? (
+                    <ul>
+                      {searchResults.map((stock, idx) => (
+                        <li 
+                          key={idx} 
+                          className="hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                          onClick={() => handleViewDetails(stock)}
+                        >
+                          <div className="p-3 flex items-center">
+                            <div className="w-12 h-12 rounded-md mr-3 overflow-hidden flex-shrink-0">
+                              <img src={getProductImage(stock.variety)} alt={stock.variety} className="w-full h-full object-cover" />
+                            </div>
+                            <div>
+                              <div className="font-medium">{stock.variety} {stock.cropType}</div>
+                              <div className="text-sm text-gray-600">Rs. {stock.price}/{stock.quantityUnit}</div>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="p-4 text-center text-gray-500">
+                      No matching products found
+                    </div>
+                  )}
+                  
+                  {searchResults.length > 0 && (
+                    <div className="p-3 border-t border-gray-100 bg-gray-50 text-center text-sm">
+                      <span className="text-gray-500">
+                        Found {searchResults.length} matching products
+                      </span>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            )}
+          </div>
         </div>
         
         {/* Hero Section */}
@@ -286,7 +390,7 @@ const StockDetailPage = () => {
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <svg className="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
