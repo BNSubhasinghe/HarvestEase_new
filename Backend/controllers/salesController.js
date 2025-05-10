@@ -1,14 +1,25 @@
 const Sales = require('../models/salesModel'); // Use require, not import
 
-// Get all sales
-const getSales = async (req, res) => {
+const getSalesByUserId = async (req, res) => {
+  const userId = req.params.user; // Get the user ID from the request parameters
   try {
-    const sales = await Sales.find().sort({ date: -1 });
-    res.status(200).json(sales);
+    const sales = await Sales.find({ user: userId }); // Call the function to find sales by user ID
+    res.status(200).json(sales); // Return the sales data
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message }); // Handle errors
   }
-};
+}
+
+
+// // Get all sales
+// const getSales = async (req, res) => {
+//   try {
+//     const sales = await Sales.find().sort({ date: -1 });
+//     res.status(200).json(sales);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 
 // Create a new sale
 const createSale = async (req, res) => {
@@ -45,4 +56,4 @@ const deleteSale = async (req, res) => {
   }
 };
 
-module.exports = { getSales, createSale, updateSale, deleteSale }; // Export the controller functions
+module.exports = { getSalesByUserId, createSale, updateSale, deleteSale }; // Export the controller functions

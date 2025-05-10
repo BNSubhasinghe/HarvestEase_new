@@ -27,6 +27,10 @@ const salesSchema = new mongoose.Schema({
       trim: true
     },
   },
+  user: { 
+    type: String, 
+    required: [true, 'User is required'],
+  },
   date: { 
     type: Date, 
     default: Date.now,
@@ -42,7 +46,6 @@ const salesSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
-
 
 salesSchema.index({ cropType: 1, date: -1 });
 

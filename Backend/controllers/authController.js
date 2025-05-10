@@ -5,6 +5,20 @@ const generateToken = (id, role) => {
   return jwt.sign({ id, role }, 'your_jwt_secret', { expiresIn: '1d' });
 };
 
+//get user by id
+ exports.getById = async (req, res) => {
+  try {
+    const userId = req.params.id; // Get the user ID from the request parameters
+    const user = await User.findById(userId); // Find the user by ID
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(user); // Send the user data as a response
+  } catch (error) {
+    res.status(500).json({ message: 'unable to fetch user. error: ', error: err.message });
+  }
+}
+
 // Register User
 exports.register = async (req, res) => {
   const { name, email, password, role } = req.body;

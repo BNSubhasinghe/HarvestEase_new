@@ -1,12 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const FarmerHeader = () => {
   const [cropDropdown, setCropDropdown] = useState(false);
   const [stockDropdown, setStockDropdown] = useState(false);
 
-  // Refs to manage dropdowns
+  const { logout, currentUser } = useAuth();
+  
+  const navigate = useNavigate();  
+  
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   const cropDropdownRef = useRef(null);
+  // Refs to manage dropdowns
   const stockDropdownRef = useRef(null);
 
   // Toggle Dropdowns with closing other dropdown
@@ -38,6 +48,11 @@ const FarmerHeader = () => {
     };
   }, []);
 
+  // handle nav link item visiblity according to the user role
+  const hasRoleAccess = (access) => {
+    return (access.includes(currentUser?.role))
+  }
+
   return (
     <header className="bg-green-800 p-4 flex justify-between items-center relative z-[99]">
       <div className="flex items-center space-x-2">
@@ -50,7 +65,7 @@ const FarmerHeader = () => {
           <Link to="/service" className="hover:text-yellow-300">Service</Link>
           <Link to="/about" className="hover:text-yellow-300">About</Link>
           <Link to="/crop-landing" className="hover:text-yellow-300">Crop</Link>
-          <Link to="/finance" className="hover:text-yellow-300">Finance</Link>
+          {hasRoleAccess(["farmer", "admin"]) && (<Link to="/finance" className="hover:text-yellow-300">Finance</Link>)}
           
 
           {/* Stock Dropdown */}
@@ -76,13 +91,18 @@ const FarmerHeader = () => {
           </div>
 
           <Link to="/disease-user" className="hover:text-yellow-300">Plant Care</Link>
-          <Link to="/login" className="bg-yellow-500 text-green-800 py-2 px-4 rounded-md hover:bg-yellow-400">
-  Log In
-</Link>
-<Link to="/register" className="bg-yellow-500 text-green-800 py-2 px-4 rounded-md hover:bg-yellow-400">
-  Sign Up
-</Link>
 
+          {currentUser ? (
+            <>
+          <Link to="/login" className="bg-yellow-500 text-green-800 py-2 px-4 rounded-md hover:bg-yellow-400">HI, {JSON.parse(localStorage.getItem("user"))?.name}</Link>
+          <Link onClick={handleLogout} className="bg-yellow-500 text-green-800 py-2 px-4 rounded-md hover:bg-yellow-400"> SignOut </Link>
+            </>
+          ) : (
+            <>
+            <Link to="/login" className="bg-yellow-500 text-green-800 py-2 px-4 rounded-md hover:bg-yellow-400">Login</Link>
+            <Link to="/register" className="bg-yellow-500 text-green-800 py-2 px-4 rounded-md hover:bg-yellow-400">Register</Link>
+            </>
+          )}
         </nav>
       </div>
     </header>

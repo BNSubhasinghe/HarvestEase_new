@@ -1,6 +1,7 @@
 const express = require('express');
 const { 
   getExpenses, 
+  getExpensesByUser,
   createExpense, 
   updateExpense, 
   deleteExpense 
@@ -8,7 +9,7 @@ const {
 
 const router = express.Router();
 
-router.get('/', getExpenses);
+router.get('/:user', getExpensesByUser); // Filter expenses by user ID
 router.post('/', createExpense);
 router.put('/:id', updateExpense);
 router.delete('/:id', deleteExpense);

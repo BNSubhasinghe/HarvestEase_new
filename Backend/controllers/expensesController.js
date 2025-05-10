@@ -1,16 +1,21 @@
 const Expenses = require('../models/expensesModel');
 
-const getExpenses = async (req, res) => {
-  try {
-    const { frequency } = req.query;
-    let filter = {};
 
-    if (frequency && frequency !== 'all') {
-      const days = parseInt(frequency);
-      filter.date = { $gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000) };
-    }
+const getExpensesByUser = async (req, res) => {
+  try {
+    let filter = { user: req.params.user }; // Filter by user ID
 
     const expenses = await Expenses.find(filter).sort({ date: -1 });
+    res.status(200).json(expenses);
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+const getAllExpenses = async (req, res) => {
+  try {
+    const expenses = await Expenses.find().sort({ date: -1 });
     res.status(200).json(expenses);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -47,9 +52,53 @@ const deleteExpense = async (req, res) => {
   }
 };
 
+const getExpensesSummary = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    let match = {};
+
+    if (startDate && endDate) {
+      match.date = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+
+    const summary = await Expenses.aggregate([
+      { $match: match },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: '$amount' },
+          count: { $sum: 1 },
+          avgAmount: { $avg: '$amount' }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          totalAmount: 1,
+          count: 1,
+          avgAmount: { $round: ['$avgAmount', 2] }
+        }
+      }
+    ]);
+
+    res.status(200).json(summary[0] || {
+      totalAmount: 0,
+      count: 0,
+      avgAmount: 0
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
-  getExpenses,
+  getExpensesByUser,
+  getAllExpenses,
   createExpense,
   updateExpense,
-  deleteExpense
+  deleteExpense,
+  getExpensesSummary
 };

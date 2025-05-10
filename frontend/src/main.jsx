@@ -6,12 +6,12 @@ import App from './App';
 
 import './index.css'; // ✅ Tailwind CSS
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext'; // ✅ Import Auth Context
+import { AuthProvider } from './contexts/AuthContext'; 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider> {/* ✅ Provide Auth context to entire app */}
+    <AuthProvider>
         <App />
       </AuthProvider>
     </BrowserRouter>
