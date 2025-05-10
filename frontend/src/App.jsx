@@ -64,7 +64,7 @@ function App() {
         <div className="flex-1 p-4">
           <Routes>
             {/* Home Page */}
-            <Route path="/" element={<CropLanding />} />
+            <Route path="/" element={<Home />} />
 
             {/* Crop Module */}
             <Route path="/crop-landing" element={<CropLanding />} />
