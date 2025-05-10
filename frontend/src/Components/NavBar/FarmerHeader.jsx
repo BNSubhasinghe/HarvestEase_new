@@ -76,8 +76,13 @@ const FarmerHeader = () => {
           </div>
 
           <Link to="/disease-user" className="hover:text-yellow-300">Plant Care</Link>
-          <button className="bg-yellow-500 text-green-800 py-2 px-4 rounded-md hover:bg-yellow-400">Log In</button>
-          <button className="bg-yellow-500 text-green-800 py-2 px-4 rounded-md hover:bg-yellow-400">Sign Up</button>
+          <Link to="/login" className="bg-yellow-500 text-green-800 py-2 px-4 rounded-md hover:bg-yellow-400">
+  Log In
+</Link>
+<Link to="/register" className="bg-yellow-500 text-green-800 py-2 px-4 rounded-md hover:bg-yellow-400">
+  Sign Up
+</Link>
+
         </nav>
       </div>
     </header>
