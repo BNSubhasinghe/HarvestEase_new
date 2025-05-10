@@ -20,10 +20,11 @@ const authRouter = require("./routes/authRoute");
 
 const app = express();
 
+
+
 // Middleware
 app.use(cors());
 app.use(express.json());
-
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static('uploads'));
@@ -40,7 +41,7 @@ app.use("/api/auth", authRouter);
 
 
 // MongoDB connection
-mongoose.connect("mongodb+srv://farmer:NHB04jfs3EkRueNA@cluster0.luiw5.mongodb.net/harvestease?retryWrites=true&w=majority")
+mongoose.connect("mongodb+srv://farmer:NHB04jfs3EkRueNA@cluster0.luiw5.mongodb.net/")
   .then(() => {
     console.log("Connected to MongoDB");
     app.listen(5000, () => console.log("Server running on port 5000"));

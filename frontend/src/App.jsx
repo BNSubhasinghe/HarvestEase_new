@@ -46,10 +46,6 @@ import { Navigate } from 'react-router-dom';
 
 
 import './App.css';
-    
-import Login from "./Pages/Login";
-import Register from "./Pages/Register";
-import AdminDashboard from "./Pages/AdminDashboard";
 
 import NotAuthorized from "./Pages/NotAuthorized";
 import PrivateRoute from "./Components/PrivateRoute";
