@@ -29,6 +29,10 @@ import Dashboard from './Pages/Dashboard'; // Path to the Dashboard component
 import Login from "./Pages/Login";
 import Register from "./Pages/Register"; // Path to the Login page
 import StockPage from './Pages/StockManage/StockPage'; // kasuni
+import ShopPage from './Pages/StockManage/ShopPage'; // kasuni
+import ShopDetailPage from './Pages/StockManage/ShopDetailPage';
+import CartPage from './Pages/StockManage/CartPage'; // kasuni
+import NaduStockDetail from './Pages/StockManage/NaduStockDetail';   // kasuni
 import DiseaseUser from './Pages/DiseaseUser';
 import DiseasesAdmin from './Pages/DiseasesAdmin';
 import KnowledgeHub from './Pages/KnowleadgeHub';
@@ -42,15 +46,20 @@ import { Navigate } from 'react-router-dom';
 
 
 import './App.css';
+    
+import Login from "./Pages/Login";
+import Register from "./Pages/Register";
+import AdminDashboard from "./Pages/AdminDashboard";
+
+import NotAuthorized from "./Pages/NotAuthorized";
+import PrivateRoute from "./Components/PrivateRoute";
 
 
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-   // Pages that need the Crop Sidebar
-   const cropSidebarRoutes = [
-    
+  const cropSidebarRoutes = [
     '/crop-form',
     '/crop-table',
     '/crop-update',
@@ -110,6 +119,7 @@ function App() {
     <>
       <Header />
 
+
       <div className="flex">
         {showCropSidebar && <CropSidebar />}
         <div className="flex-1 p-4">
@@ -124,6 +134,9 @@ function App() {
             <Route path="/crop-update/:id" element={<CropUpdate />} />
             <Route path="/crop-chart" element={<CropChart />} />
             <Route path="/crop-planning" element={<CropPlanning />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/not-authorized" element={<NotAuthorized />} />
 
             {/* ✅ Crop Detail Pages */}
             <Route path="/crop-detail/nadu" element={<NaduDetail />} />
@@ -134,35 +147,51 @@ function App() {
             <Route path="/crop-detail/pachchaperumal" element={<PachchaDetail />} />
 
             {/* ✅ Other Pages */}
-            <Route path="/about" element={<AboutUs />} />
-            <Route path="/services" element={<Services />} />
             <Route path="/services/crop-tracking" element={<CropTrackingDetail />} />
             <Route path="/services/harvest-stock" element={<HarvestStockDetail />} />
             <Route path="/services/cost-tracking" element={<CostTrackingDetail />} />
             <Route path="/services/smart-plant" element={<SmartPlantCareDetail />} />
+          
+          {/* Protected Dashboards */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <PrivateRoute allowedRoles={["admin"]}>
+                  <AdminDashboard />
+                </PrivateRoute>
+              }
+            />
+          
           </Routes>
+
         </div>
       </div>
 
-      <Routes>
-         <Route path="/finance" element={handleNavigation({page: "finance", element: <FinancialDashboard /> }) } />
-        <Route path="/farmer-finance" element={<ProtectedRoute access={["farmer"]} element={<FinancialDashboard />} />} />
-        <Route path="/admin-dashboard" element={<ProtectedRoute access={["admin"]} element={<AdminDashboard />} />} />
-        <Route path="/admin-finance" element={<ProtectedRoute access={["admin"]} element={<AdminFinancialDashboard />} />} />
-        <Route path="/stock-management" element={<StockPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        {/* <Route path="/" exact component={<LoginPage />} /> */}
-        <Route path="/disease-user" element={<DiseaseUser />} />
-        <Route path="/diseases-admin" element={<DiseasesAdmin />} />
-        <Route path="/knowledge-hub" element={<KnowledgeHub />} />
-        {/* <Route path="/farmer-home" element={<FarmerHome />} /> */}
-        <Route path="/farmer-home" element={<ProtectedRoute access={["farmer"]} element={<FarmerHome />} />} />
-        <Route path="/admin-home" element={<AdminHome />} />
-
-      </Routes>
-      <Footer />
+          <Routes>
+            <Route path="/finance" element={handleNavigation({page: "finance", element: <FinancialDashboard /> }) } />
+            <Route path="/farmer-finance" element={<ProtectedRoute access={["farmer"]} element={<FinancialDashboard />} />} />
+            <Route path="/admin-dashboard" element={<ProtectedRoute access={["admin"]} element={<AdminDashboard />} />} />
+            <Route path="/admin-finance" element={<ProtectedRoute access={["admin"]} element={<AdminFinancialDashboard />} />} />
+            <Route path="/stock-management" element={<StockPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            {/* <Route path="/" exact component={<LoginPage />} /> */}
+            <Route path="/disease-user" element={<DiseaseUser />} />
+            <Route path="/diseases-admin" element={<DiseasesAdmin />} />
+            <Route path="/knowledge-hub" element={<KnowledgeHub />} />
+            {/* <Route path="/farmer-home" element={<FarmerHome />} /> */}
+            <Route path="/farmer-home" element={<ProtectedRoute access={["farmer"]} element={<FarmerHome />} />} />
+            <Route path="/admin-home" element={<AdminHome />} />
+            {/* kasuni */}
+            <Route path="/stock-management" element={<StockPage />} />
+            <Route path="/shop" element={<ShopPage />} /> 
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/shop-detail/:id" element={<ShopDetailPage />} />
+            <Route path="/nadu-stock-detail" element={<NaduStockDetail />} />
+                
+                
+              </Routes>
     </>
   );
 }

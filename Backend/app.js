@@ -20,11 +20,10 @@ const authRouter = require("./routes/authRoute");
 
 const app = express();
 
-console.log("Plant API Key:", process.env.PLANT_API_KEY);//mayomi
-
 // Middleware
 app.use(cors());
 app.use(express.json());
+
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static('uploads'));
@@ -40,13 +39,10 @@ app.use('/api/admin', adminRoutes);
 app.use("/api/auth", authRouter);
 
 
-// MongoDB connection 
-mongoose.connect("mongodb+srv://farmer:NHB04jfs3EkRueNA@cluster0.luiw5.mongodb.net/")
-    .then(() => {
-        console.log("Connected to MongoDB");
-        // Start the server after successful MongoDB connection
-        app.listen(5000, () => {
-            console.log('Server is running on port 5000');
-        });
-    })
-    .catch((err) => console.log(err));
+// MongoDB connection
+mongoose.connect("mongodb+srv://farmer:NHB04jfs3EkRueNA@cluster0.luiw5.mongodb.net/harvestease?retryWrites=true&w=majority")
+  .then(() => {
+    console.log("Connected to MongoDB");
+    app.listen(5000, () => console.log("Server running on port 5000"));
+  })
+  .catch((err) => console.log(err));
