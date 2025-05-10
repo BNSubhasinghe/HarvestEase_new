@@ -139,11 +139,18 @@ const StockDetailPage = () => {
 
   // Handle quantity selection for adding to cart
   const handleSelectedQuantityChange = (change) => {
-    setSelectedQuantity(prev => Math.max(1, Math.min(prev + change, selectedStock?.quantity || 10)));
+    setSelectedQuantity(prev => {
+      const newQuantity = prev + change;
+      // Make sure quantity is at least 1 and no more than available stock
+      return Math.max(1, Math.min(newQuantity, selectedStock?.quantity || 0));
+    });
   };
 
   const handleViewDetails = (stock) => {
-    setSelectedStock(stock);
+    // Get the most up-to-date stock information
+    const currentStock = stocks.find(s => s._id === stock._id) || stock;
+    
+    setSelectedStock(currentStock);
     setSelectedQuantity(1);
     setModalOpen(true);
     setShowSearchResults(false);
@@ -181,8 +188,17 @@ const StockDetailPage = () => {
     // Save updated cart to localStorage
     localStorage.setItem("cart", JSON.stringify(currentCart));
     
-    // Update component state
+    // Update component state for cart
     setCart(currentCart);
+    
+    // Update local stocks state to show decreased quantity
+    setStocks(prevStocks => 
+      prevStocks.map(item => 
+        item._id === stock._id 
+          ? { ...item, quantity: Math.max(0, item.quantity - quantity) } 
+          : item
+      )
+    );
     
     // Show notification
     setNotification({
