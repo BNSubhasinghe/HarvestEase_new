@@ -33,18 +33,21 @@ import ShopPage from './Pages/StockManage/ShopPage'; // kasuni
 import ShopDetailPage from './Pages/StockManage/ShopDetailPage';
 import CartPage from './Pages/StockManage/CartPage'; // kasuni
 import NaduStockDetail from './Pages/StockManage/NaduStockDetail';   // kasuni
+import SambaStockDetail from './Pages/StockManage/SambaStockDetail';
+//import Bg352StockDetail from './Pages/StockManage/BG352StockDetail'; // kasuni
+import SuwandelStockDetail from './Pages/StockManage/SuwandelStockDetail'; // kasuni
+import RedRiceStockDetail from './Pages/StockManage/RedRiceStockDetail'; // kasuni
+import PachchaStockDetail from './Pages/StockManage/PachchaStockDetail'; // kasuni
 import DiseaseUser from './Pages/DiseaseUser';
 import DiseasesAdmin from './Pages/DiseasesAdmin';
 import KnowledgeHub from './Pages/KnowleadgeHub';
 import './App.css';
 
-
 function App() {
   const location = useLocation();
 
-   // Pages that need the Crop Sidebar
-   const cropSidebarRoutes = [
-    
+  // Pages that need the Crop Sidebar
+  const cropSidebarRoutes = [
     '/crop-form',
     '/crop-table',
     '/crop-update',
@@ -61,34 +64,15 @@ function App() {
     <>
       <Header />
 
-      <Routes>
-        <Route path="/" element={<CropLanding />} />
-        <Route path="/crop-form" element={<CropForm />} />
-        <Route path="/crop-table" element={<CropTable />} />
-        <Route path="/crop-update/:id" element={<CropUpdate />} />
-        <Route path="/crop-chart" element={<CropChart />} />
-        <Route path="/crop-planning" element={<CropPlanning />} />
-        <Route path="/crop-detail/nadu" element={<NaduDetail />} />
-        <Route path="/crop-detail/samba" element={<SambaDetail />} />
-        <Route path="/crop-detail/redrice" element={<RedRiceDetail />} />
-        <Route path="/crop-detail/bg352" element={<Bg352Detail />} />
-        <Route path="/crop-detail/suwandel" element={<SuwandelDetail />} />
-        <Route path="/finance" element={<FinancialDashboard />} />
-
-        {/* kasuni */}
-        <Route path="/stock-management" element={<StockPage />} />
-        <Route path="/shop" element={<ShopPage />} /> 
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/shop-detail/:id" element={<ShopDetailPage />} />
-        <Route path="/nadu-stock-detail" element={<NaduStockDetail />} />
-
-
       <div className="flex">
         {showCropSidebar && <CropSidebar />}
         <div className="flex-1 p-4">
           <Routes>
-            {/* ✅ Home Page */}
-            <Route path="/" element={<Home />} />
+            {/* ✅ Main Pages */}
+            <Route path="/" element={<CropLanding />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/services" element={<Services />} />
 
             {/* ✅ Crop Module */}
             <Route path="/crop-landing" element={<CropLanding />} />
@@ -106,30 +90,41 @@ function App() {
             <Route path="/crop-detail/suwandel" element={<SuwandelDetail />} />
             <Route path="/crop-detail/pachchaperumal" element={<PachchaDetail />} />
 
-            {/* ✅ Other Pages */}
-            <Route path="/about" element={<AboutUs />} />
-            <Route path="/services" element={<Services />} />
+            {/* ✅ Services Subpages */}
             <Route path="/services/crop-tracking" element={<CropTrackingDetail />} />
             <Route path="/services/harvest-stock" element={<HarvestStockDetail />} />
             <Route path="/services/cost-tracking" element={<CostTrackingDetail />} />
             <Route path="/services/smart-plant" element={<SmartPlantCareDetail />} />
+
+            {/* ✅ Finance and Dashboard */}
+            <Route path="/finance" element={<FinancialDashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+
+            {/* ✅ User Auth */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            {/* ✅ Stock Management */}
+            <Route path="/stock-management" element={<StockPage />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/shop-detail/:id" element={<ShopDetailPage />} />
+            <Route path="/nadu-stock-detail" element={<NaduStockDetail />} />
+            <Route path="/samba-stock-detail" element={<SambaStockDetail />} />
+            <Route path="/pachcha-stock-detail" element={<PachchaStockDetail />} />
+            <Route path="/redrice-stock-detail" element={<RedRiceStockDetail />} />
+            {/* <Route path="/bg352-stock-detail" element={<BG352StockDetail />} /> */}
+            <Route path="/suwandel-stock-detail" element={<SuwandelStockDetail />} />
+
+
+            {/* ✅ Disease and Knowledge */}
+            <Route path="/disease-user" element={<DiseaseUser />} />
+            <Route path="/diseases-admin" element={<DiseasesAdmin />} />
+            <Route path="/knowledge-hub" element={<KnowledgeHub />} />
           </Routes>
         </div>
       </div>
 
-      <Routes>
- 
-        <Route path="/finance" element={<FinancialDashboard />} />
-        <Route path="/stock-management" element={<StockPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        {/* <Route path="/" exact component={<LoginPage />} /> */}
-        <Route path="/disease-user" element={<DiseaseUser />} />
-        <Route path="/diseases-admin" element={<DiseasesAdmin />} />
-        <Route path="/knowledge-hub" element={<KnowledgeHub />} />
-
-      </Routes>
       <Footer />
     </>
   );

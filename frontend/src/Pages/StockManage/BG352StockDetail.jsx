@@ -7,7 +7,7 @@ import {
   FaRulerHorizontal, FaTint, FaTemperatureHigh 
 } from "react-icons/fa";
 
-const StockDetailPage = () => {
+const ShopPage = () => {
   const [stocks, setStocks] = useState([]);
   const [cart, setCart] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -19,26 +19,6 @@ const StockDetailPage = () => {
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   
   const modalRef = useRef();
-  
-  // Determine variety from filename - extract the variety name from the file name
-  const getVarietyFromFileName = () => {
-    const path = window.location.pathname;
-    const fileName = path.split('/').pop().replace('-stock-detail', '');
-    
-    // Map filename to proper variety name
-    const varietyMap = {
-      'nadu': 'Nadu',
-      'samba': 'Samba',
-      'bg352': 'BG352',
-      'pachcha': 'Pachcha',
-      'redrice': 'Red Rice',
-      'suwandel': 'Suwandel'
-    };
-    
-    return varietyMap[fileName.toLowerCase()] || fileName;
-  };
-  
-  const variety = getVarietyFromFileName();
 
   // Fetch stock data from backend
   useEffect(() => {
@@ -78,7 +58,7 @@ const StockDetailPage = () => {
 
   // Filter stocks based on selected filter and variety
   const filteredStocks = stocks.filter(
-    (stock) => stock.variety === variety && stock.cropType.toLowerCase() === filter.toLowerCase()
+    (stock) => stock.variety === "BG352" && stock.cropType.toLowerCase() === filter.toLowerCase()
   );
 
   // Get product image based on variety
@@ -92,7 +72,7 @@ const StockDetailPage = () => {
       'Suwandel': '/shopImg/suwandel.jpg'
     };
     
-    return varietyMap[variety] || '/shopImg/nadu.jpg'; // Default image if variety not found
+    return varietyMap[variety] || '/shopImg/bg352.jpg'; // Default image if variety not found
   };
 
   // Handle quantity change (increase/decrease)
@@ -144,31 +124,13 @@ const StockDetailPage = () => {
   };
 
   // Get variety description based on name
-  const getVarietyDescription = (variety) => {
-    const descriptions = {
-      'Nadu': 'Popular for dry zones, moderate growth, high yield. Known for its adaptability to various cooking styles.',
-      'Samba': 'Fragrant, fine grain, needs longer growth period. A premium variety with exceptional taste and aroma.',
-      'BG352': 'Hybrid rice, high yield, adaptable to many climates. Developed for maximum productivity.',
-      'Pachcha': 'A nutritious, traditional variety with low water needs and excellent taste profile.',
-      'Red Rice': 'Nutritious, traditional variety, packed with antioxidants and essential minerals.',
-      'Suwandel': 'Fragrant and soft, a premium traditional rice variety cherished for its delicate flavor.'
-    };
-    
-    return descriptions[variety] || 'A high-quality variety of rice with excellent nutritional value.';
+  const getVarietyDescription = () => {
+    return 'Hybrid rice variety with high yield and adaptability to various climates. Developed for maximum productivity and resilience to environmental challenges.';
   };
 
   // Determine dynamic background color based on variety
-  const getBackgroundGradient = (variety) => {
-    const gradients = {
-      'Nadu': 'from-amber-50 via-white to-amber-100',
-      'Samba': 'from-blue-50 via-white to-blue-100',
-      'BG352': 'from-green-50 via-white to-green-100',
-      'Pachcha': 'from-emerald-50 via-white to-emerald-100',
-      'Red Rice': 'from-red-50 via-white to-red-100',
-      'Suwandel': 'from-yellow-50 via-white to-yellow-100'
-    };
-    
-    return gradients[variety] || 'from-green-50 via-white to-green-100';
+  const getBackgroundGradient = () => {
+    return 'from-green-50 via-white to-green-100';
   };
 
   const renderStars = (rating) => {
@@ -207,8 +169,8 @@ const StockDetailPage = () => {
     if (type.toLowerCase() === 'rice') {
       return [
         { icon: <FaTint className="text-blue-500" />, text: 'Ready to Cook' },
-        { icon: <FaLeaf className="text-green-500" />, text: 'Processed Quality' },
-        { icon: <FaStar className="text-yellow-500" />, text: 'Premium Grade' }
+        { icon: <FaLeaf className="text-green-500" />, text: 'High Yield' },
+        { icon: <FaStar className="text-yellow-500" />, text: 'Versatile' }
       ];
     } else {
       return [
@@ -220,7 +182,7 @@ const StockDetailPage = () => {
   };
 
   return (
-    <div className={`bg-gradient-to-br ${getBackgroundGradient(variety)} min-h-screen font-sans`}>
+    <div className={`bg-gradient-to-br ${getBackgroundGradient()} min-h-screen font-sans`}>
       {/* Notification */}
       <AnimatePresence>
         {notification && (
@@ -242,7 +204,7 @@ const StockDetailPage = () => {
           <FaChevronRight className="mx-2 text-xs" />
           <a href="#" className="hover:text-green-600 transition">Rice Varieties</a>
           <FaChevronRight className="mx-2 text-xs" />
-          <span className="text-gray-800 font-medium">{variety}</span>
+          <span className="text-gray-800 font-medium">BG352</span>
         </div>
         
         {/* Hero Section */}
@@ -255,8 +217,8 @@ const StockDetailPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <h1 className="text-5xl sm:text-6xl font-extrabold mb-4 drop-shadow-lg">{variety}</h1>
-              <p className="text-lg sm:text-xl font-light mb-8">{getVarietyDescription(variety)}</p>
+              <h1 className="text-5xl sm:text-6xl font-extrabold mb-4 drop-shadow-lg">BG352</h1>
+              <p className="text-lg sm:text-xl font-light mb-8">{getVarietyDescription()}</p>
               <div className="flex flex-wrap gap-3">
                 <button 
                   onClick={() => setFilter("Rice")}
@@ -299,7 +261,7 @@ const StockDetailPage = () => {
               <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
                 <FaLeaf className="text-4xl text-green-300" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-700 mb-2">No {variety} {filter.toLowerCase()} available</h2>
+              <h2 className="text-2xl font-bold text-gray-700 mb-2">No BG352 {filter.toLowerCase()} available</h2>
               <p className="text-gray-600 mb-8">We're currently out of stock of this variety. Check back soon!</p>
               <button
                 onClick={() => setFilter(filter === "Rice" ? "Paddy" : "Rice")}
@@ -314,7 +276,7 @@ const StockDetailPage = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <h2 className="text-3xl font-bold mb-8 text-center">Available {variety} {filter}</h2>
+              <h2 className="text-3xl font-bold mb-8 text-center">Available BG352 {filter}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredStocks.map((stock) => (
                   <motion.div
@@ -344,7 +306,7 @@ const StockDetailPage = () => {
                           {stock.cropType}
                         </span>
                         <div className="flex items-center">
-                          {renderStars(4.7)}
+                          {renderStars(4.5)}
                         </div>
                       </div>
                       
@@ -402,7 +364,7 @@ const StockDetailPage = () => {
           <h2 className="text-3xl font-bold mb-8 text-center">You Might Also Like</h2>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {['Nadu', 'Samba', 'Red Rice', 'BG352'].filter(v => v !== variety).slice(0, 4).map((relatedVariety, idx) => (
+            {['Nadu', 'Samba', 'Red Rice', 'Pachcha'].map((relatedVariety, idx) => (
               <a 
                 href={`/${relatedVariety.toLowerCase().replace(' ', '-')}-stock-detail`}
                 key={idx}
@@ -422,180 +384,3 @@ const StockDetailPage = () => {
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">{relatedVariety}</h3>
                     <div className="flex items-center text-yellow-500 mb-2">
-                      {[...Array(5)].map((_, i) => (
-                        <FaStar key={i} className={i < 4 ? "text-yellow-400 w-3 h-3" : "text-gray-300 w-3 h-3"} />
-                      ))}
-                    </div>
-                    <span className="text-green-700 font-semibold">View Products</span>
-                  </div>
-                </motion.div>
-              </a>
-            ))}
-          </div>
-        </section>
-
-        {/* Product Details Modal */}
-        <AnimatePresence>
-          {modalOpen && selectedStock && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            >
-              <motion.div 
-                ref={modalRef}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="relative bg-white rounded-2xl overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col md:flex-row shadow-2xl"
-                transition={{ type: "spring", damping: 25 }}
-              >
-                {/* Close button */}
-                <button
-                  onClick={closeModal}
-                  className="absolute top-4 right-4 z-10 bg-white/80 backdrop-blur-sm w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors"
-                >
-                  <FaTimes />
-                </button>
-                
-                {/* Product Image */}
-                <div className="md:w-1/2 h-72 md:h-auto relative">
-                  <img
-                    src={getProductImage(selectedStock.variety)}
-                    alt={selectedStock.variety}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6 text-white md:hidden">
-                    <h2 className="text-3xl font-bold">{selectedStock.variety}</h2>
-                    <p className="text-xl font-light">{selectedStock.cropType}</p>
-                  </div>
-                </div>
-                
-                {/* Product Details */}
-                <div className="md:w-1/2 p-6 overflow-y-auto">
-                  <div className="hidden md:block">
-                    <h2 className="text-3xl font-bold text-gray-800">{selectedStock.variety}</h2>
-                    <div className="flex items-center mb-4">
-                      <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
-                        {selectedStock.cropType}
-                      </span>
-                      <div className="ml-4 flex items-center">
-                        {renderStars(4.7)}
-                        <span className="ml-2 text-sm text-gray-600">(47 reviews)</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Price and Quantity Selector */}
-                  <div className="bg-gray-50 p-4 rounded-xl mb-6">
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="text-gray-700">Price:</span>
-                      <span className="text-2xl font-bold text-green-700">Rs. {selectedStock.price}/{selectedStock.quantityUnit}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-700">Quantity:</span>
-                      <div className="flex items-center gap-3">
-                        <button
-                          className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
-                          onClick={() => handleSelectedQuantityChange(-1)}
-                          disabled={selectedQuantity <= 1}
-                        >
-                          -
-                        </button>
-                        <span className="w-10 text-center font-medium">{selectedQuantity}</span>
-                        <button
-                          className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
-                          onClick={() => handleSelectedQuantityChange(1)}
-                          disabled={selectedQuantity >= selectedStock.quantity}
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                    <div className="mt-4 text-sm text-gray-500 text-right">
-                      {selectedStock.quantity} {selectedStock.quantityUnit} available
-                    </div>
-                  </div>
-                  
-                  {/* Product Specifications */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold mb-3 text-gray-800">Product Details</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between border-b border-gray-100 pb-2">
-                        <span className="text-gray-600">Farmer:</span>
-                        <span className="font-medium text-gray-800">{selectedStock.farmerName}</span>
-                      </div>
-                      <div className="flex justify-between border-b border-gray-100 pb-2">
-                        <span className="text-gray-600">Quality Grade:</span>
-                        <span className="font-medium text-gray-800">{selectedStock.qualityGrade}</span>
-                      </div>
-                      <div className="flex justify-between border-b border-gray-100 pb-2">
-                        <span className="text-gray-600">Stock Date:</span>
-                        <span className="font-medium text-gray-800">{new Date(selectedStock.stockDate).toLocaleDateString()}</span>
-                      </div>
-                      
-                      {selectedStock.harvestedDate && (
-                        <div className="flex justify-between border-b border-gray-100 pb-2">
-                          <span className="text-gray-600">Harvested Date:</span>
-                          <span className="font-medium text-gray-800">{new Date(selectedStock.harvestedDate).toLocaleDateString()}</span>
-                        </div>
-                      )}
-                      
-                      {selectedStock.moistureLevel !== undefined && (
-                        <div className="flex justify-between border-b border-gray-100 pb-2">
-                          <span className="text-gray-600">Moisture Level:</span>
-                          <span className="font-medium text-gray-800">{selectedStock.moistureLevel}%</span>
-                        </div>
-                      )}
-                      
-                      {selectedStock.storageLocation && (
-                        <div className="flex justify-between border-b border-gray-100 pb-2">
-                          <span className="text-gray-600">Storage Location:</span>
-                          <span className="font-medium text-gray-800">{selectedStock.storageLocation}</span>
-                        </div>
-                      )}
-                      
-                      {selectedStock.processingType && (
-                        <div className="flex justify-between border-b border-gray-100 pb-2">
-                          <span className="text-gray-600">Processing Type:</span>
-                          <span className="font-medium text-gray-800">{selectedStock.processingType}</span>
-                        </div>
-                      )}
-                      
-                      {selectedStock.packagingType && (
-                        <div className="flex justify-between border-b border-gray-100 pb-2">
-                          <span className="text-gray-600">Packaging:</span>
-                          <span className="font-medium text-gray-800">{selectedStock.packagingType}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Description if available */}
-                  {selectedStock.description && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2 text-gray-800">Description</h3>
-                      <p className="text-gray-600">{selectedStock.description}</p>
-                    </div>
-                  )}
-                  
-                  {/* Add to Cart Button */}
-                  <button
-                    onClick={() => handleAddToCart(selectedStock)}
-                    className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-4 rounded-xl font-medium transition flex items-center justify-center"
-                  >
-                    <FaShoppingCart className="mr-2" />
-                    Add {selectedQuantity} {selectedStock.quantityUnit} to Cart
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
-  );
-};
-
-export default StockDetailPage;

@@ -7,7 +7,7 @@ import {
   FaRulerHorizontal, FaTint, FaTemperatureHigh 
 } from "react-icons/fa";
 
-const StockDetailPage = () => {
+const ShopPage = () => {
   const [stocks, setStocks] = useState([]);
   const [cart, setCart] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -19,26 +19,6 @@ const StockDetailPage = () => {
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   
   const modalRef = useRef();
-  
-  // Determine variety from filename - extract the variety name from the file name
-  const getVarietyFromFileName = () => {
-    const path = window.location.pathname;
-    const fileName = path.split('/').pop().replace('-stock-detail', '');
-    
-    // Map filename to proper variety name
-    const varietyMap = {
-      'nadu': 'Nadu',
-      'samba': 'Samba',
-      'bg352': 'BG352',
-      'pachcha': 'Pachcha',
-      'redrice': 'Red Rice',
-      'suwandel': 'Suwandel'
-    };
-    
-    return varietyMap[fileName.toLowerCase()] || fileName;
-  };
-  
-  const variety = getVarietyFromFileName();
 
   // Fetch stock data from backend
   useEffect(() => {
@@ -78,7 +58,7 @@ const StockDetailPage = () => {
 
   // Filter stocks based on selected filter and variety
   const filteredStocks = stocks.filter(
-    (stock) => stock.variety === variety && stock.cropType.toLowerCase() === filter.toLowerCase()
+    (stock) => stock.variety === "Suwandel" && stock.cropType.toLowerCase() === filter.toLowerCase()
   );
 
   // Get product image based on variety
@@ -92,7 +72,7 @@ const StockDetailPage = () => {
       'Suwandel': '/shopImg/suwandel.jpg'
     };
     
-    return varietyMap[variety] || '/shopImg/nadu.jpg'; // Default image if variety not found
+    return varietyMap[variety] || '/shopImg/suwandel.jpg'; // Default image if variety not found
   };
 
   // Handle quantity change (increase/decrease)
@@ -144,37 +124,19 @@ const StockDetailPage = () => {
   };
 
   // Get variety description based on name
-  const getVarietyDescription = (variety) => {
-    const descriptions = {
-      'Nadu': 'Popular for dry zones, moderate growth, high yield. Known for its adaptability to various cooking styles.',
-      'Samba': 'Fragrant, fine grain, needs longer growth period. A premium variety with exceptional taste and aroma.',
-      'BG352': 'Hybrid rice, high yield, adaptable to many climates. Developed for maximum productivity.',
-      'Pachcha': 'A nutritious, traditional variety with low water needs and excellent taste profile.',
-      'Red Rice': 'Nutritious, traditional variety, packed with antioxidants and essential minerals.',
-      'Suwandel': 'Fragrant and soft, a premium traditional rice variety cherished for its delicate flavor.'
-    };
-    
-    return descriptions[variety] || 'A high-quality variety of rice with excellent nutritional value.';
+  const getVarietyDescription = () => {
+    return 'Fragrant and soft, a premium traditional rice variety cherished for its delicate flavor and aroma. Perfect for special occasions and traditional dishes.';
   };
 
   // Determine dynamic background color based on variety
-  const getBackgroundGradient = (variety) => {
-    const gradients = {
-      'Nadu': 'from-amber-50 via-white to-amber-100',
-      'Samba': 'from-blue-50 via-white to-blue-100',
-      'BG352': 'from-green-50 via-white to-green-100',
-      'Pachcha': 'from-emerald-50 via-white to-emerald-100',
-      'Red Rice': 'from-red-50 via-white to-red-100',
-      'Suwandel': 'from-yellow-50 via-white to-yellow-100'
-    };
-    
-    return gradients[variety] || 'from-green-50 via-white to-green-100';
+  const getBackgroundGradient = () => {
+    return 'from-yellow-50 via-white to-yellow-100';
   };
 
   const renderStars = (rating) => {
     const stars = [];
-    const fullStars = Math.floor(rating || 4.5);
-    const hasHalfStar = (rating || 4.5) - fullStars >= 0.5;
+    const fullStars = Math.floor(rating || 4.9);
+    const hasHalfStar = (rating || 4.9) - fullStars >= 0.5;
     
     // Full stars
     for (let i = 0; i < fullStars; i++) {
@@ -207,8 +169,8 @@ const StockDetailPage = () => {
     if (type.toLowerCase() === 'rice') {
       return [
         { icon: <FaTint className="text-blue-500" />, text: 'Ready to Cook' },
-        { icon: <FaLeaf className="text-green-500" />, text: 'Processed Quality' },
-        { icon: <FaStar className="text-yellow-500" />, text: 'Premium Grade' }
+        { icon: <FaLeaf className="text-green-500" />, text: 'Traditional' },
+        { icon: <FaStar className="text-yellow-500" />, text: 'Exquisite Aroma' }
       ];
     } else {
       return [
@@ -220,7 +182,7 @@ const StockDetailPage = () => {
   };
 
   return (
-    <div className={`bg-gradient-to-br ${getBackgroundGradient(variety)} min-h-screen font-sans`}>
+    <div className={`bg-gradient-to-br ${getBackgroundGradient()} min-h-screen font-sans`}>
       {/* Notification */}
       <AnimatePresence>
         {notification && (
@@ -242,7 +204,7 @@ const StockDetailPage = () => {
           <FaChevronRight className="mx-2 text-xs" />
           <a href="#" className="hover:text-green-600 transition">Rice Varieties</a>
           <FaChevronRight className="mx-2 text-xs" />
-          <span className="text-gray-800 font-medium">{variety}</span>
+          <span className="text-gray-800 font-medium">Suwandel</span>
         </div>
         
         {/* Hero Section */}
@@ -255,8 +217,8 @@ const StockDetailPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <h1 className="text-5xl sm:text-6xl font-extrabold mb-4 drop-shadow-lg">{variety}</h1>
-              <p className="text-lg sm:text-xl font-light mb-8">{getVarietyDescription(variety)}</p>
+              <h1 className="text-5xl sm:text-6xl font-extrabold mb-4 drop-shadow-lg">Suwandel</h1>
+              <p className="text-lg sm:text-xl font-light mb-8">{getVarietyDescription()}</p>
               <div className="flex flex-wrap gap-3">
                 <button 
                   onClick={() => setFilter("Rice")}
@@ -299,7 +261,7 @@ const StockDetailPage = () => {
               <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
                 <FaLeaf className="text-4xl text-green-300" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-700 mb-2">No {variety} {filter.toLowerCase()} available</h2>
+              <h2 className="text-2xl font-bold text-gray-700 mb-2">No Suwandel {filter.toLowerCase()} available</h2>
               <p className="text-gray-600 mb-8">We're currently out of stock of this variety. Check back soon!</p>
               <button
                 onClick={() => setFilter(filter === "Rice" ? "Paddy" : "Rice")}
@@ -314,7 +276,7 @@ const StockDetailPage = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <h2 className="text-3xl font-bold mb-8 text-center">Available {variety} {filter}</h2>
+              <h2 className="text-3xl font-bold mb-8 text-center">Available Suwandel {filter}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredStocks.map((stock) => (
                   <motion.div
@@ -344,7 +306,7 @@ const StockDetailPage = () => {
                           {stock.cropType}
                         </span>
                         <div className="flex items-center">
-                          {renderStars(4.7)}
+                          {renderStars(4.9)}
                         </div>
                       </div>
                       
@@ -402,7 +364,7 @@ const StockDetailPage = () => {
           <h2 className="text-3xl font-bold mb-8 text-center">You Might Also Like</h2>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {['Nadu', 'Samba', 'Red Rice', 'BG352'].filter(v => v !== variety).slice(0, 4).map((relatedVariety, idx) => (
+            {['Nadu', 'Samba', 'Red Rice', 'BG352'].map((relatedVariety, idx) => (
               <a 
                 href={`/${relatedVariety.toLowerCase().replace(' ', '-')}-stock-detail`}
                 key={idx}
@@ -481,8 +443,8 @@ const StockDetailPage = () => {
                         {selectedStock.cropType}
                       </span>
                       <div className="ml-4 flex items-center">
-                        {renderStars(4.7)}
-                        <span className="ml-2 text-sm text-gray-600">(47 reviews)</span>
+                        {renderStars(4.9)}
+                        <span className="ml-2 text-sm text-gray-600">(63 reviews)</span>
                       </div>
                     </div>
                   </div>
@@ -598,4 +560,4 @@ const StockDetailPage = () => {
   );
 };
 
-export default StockDetailPage;
+export default ShopPage;
