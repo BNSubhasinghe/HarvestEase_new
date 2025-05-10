@@ -196,12 +196,20 @@ export default function FinancialDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
+      const userId = JSON.parse(localStorage.getItem('user'))._id;
+      console.log('userId:', userId);
+      
+
       const [salesResponse, expensesResponse] = await Promise.all([
-        fetch('http://localhost:5000/api/sales').then(res => {
+        // fetch('http://localhost:5000/api/sales').then(res => {
+        //   if (!res.ok) throw new Error('Failed to fetch sales');
+        //   return res.json();
+        // }),
+        fetch(`http://localhost:5000/api/sales/${userId}`).then(res => {
           if (!res.ok) throw new Error('Failed to fetch sales');
           return res.json();
         }),
-        fetch('http://localhost:5000/api/expenses').then(res => {
+        fetch(`http://localhost:5000/api/expenses/${userId}`).then(res => { // Fetch expenses by user ID
           if (!res.ok) throw new Error('Failed to fetch expenses');
           return res.json();
         })
@@ -370,6 +378,7 @@ export default function FinancialDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...values,
+          user: JSON.parse(localStorage.getItem('user'))._id,
           date: selectedDate
         })
       });
@@ -426,31 +435,32 @@ export default function FinancialDashboard() {
   const handleAddExpense = async (values) => {
     setLoading(true);
     try {
-      const selectedDate = values.date ? values.date.format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD'); // Format the date as string
-      const today = dayjs().format('YYYY-MM-DD'); // Get today's date as string
-  
+      const selectedDate = values.date ? values.date.format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD');
+      const today = dayjs().format('YYYY-MM-DD');
+
       // Ensure the selected date is not in the future
       if (selectedDate > today) {
         message.error('Expense date cannot be in the future.');
-        return; // Prevent the request from being sent
+        return;
       }
-  
+
       const url = editExpense ? `http://localhost:5000/api/expenses/${editExpense._id}` : 'http://localhost:5000/api/expenses';
       const method = editExpense ? 'PUT' : 'POST';
-  
+
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...values,
-          date: selectedDate // Send the formatted date
+          user: JSON.parse(localStorage.getItem('user'))._id,
+          date: selectedDate
         })
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to save expense');
       }
-  
+
       setIsExpenseModalVisible(false);
       expenseForm.resetFields();
       setEditExpense(null);
@@ -463,7 +473,6 @@ export default function FinancialDashboard() {
       setLoading(false);
     }
   };
-  
 
   const handleEditExpense = (expense) => {
     expenseForm.setFieldsValue({
@@ -477,8 +486,8 @@ export default function FinancialDashboard() {
   const handleDeleteExpense = async (id) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/expenses/${id}`, { 
-        method: 'DELETE' 
+      const response = await fetch(`http://localhost:5000/api/expenses/${id}`, {
+        method: 'DELETE'
       });
 
       if (!response.ok) {

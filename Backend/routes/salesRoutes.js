@@ -1,11 +1,13 @@
 
 const express = require('express');
-const { getSales, createSale, updateSale, deleteSale } = require('../controllers/salesController');
+const { getSalesByUserId, createSale, updateSale, deleteSale } = require('../controllers/salesController');
 
 const router = express.Router();
 
 
-router.get('/', getSales);
+//router.get('/', getSales);
+
+router.get('/:user', getSalesByUserId);
 
 router.post('/', createSale);
 
