@@ -77,7 +77,7 @@ function App() {
     }
 
     if (!access.includes(currentUser?.role)) {
-      navigate("/not-authorized");
+      navigate("/");
     }
     
     return element;
@@ -188,6 +188,7 @@ function App() {
                 
                 
               </Routes>
+              <Footer />
     </>
   );
 }

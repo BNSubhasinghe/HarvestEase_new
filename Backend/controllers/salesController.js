@@ -10,17 +10,6 @@ const getSalesByUserId = async (req, res) => {
   }
 }
 
-
-// // Get all sales
-// const getSales = async (req, res) => {
-//   try {
-//     const sales = await Sales.find().sort({ date: -1 });
-//     res.status(200).json(sales);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
 // Create a new sale
 const createSale = async (req, res) => {
   try {
@@ -56,4 +45,13 @@ const deleteSale = async (req, res) => {
   }
 };
 
-module.exports = { getSalesByUserId, createSale, updateSale, deleteSale }; // Export the controller functions
+const getAdminSales = async (req, res) => {
+  try {
+    const sales = await Sales.find().sort({ date: -1 });
+    res.status(200).json(sales);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { getSalesByUserId, createSale, updateSale, deleteSale, getAdminSales }; // Export the controller functions
