@@ -1,12 +1,22 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  FaUser, FaEnvelope, FaSeedling, FaLeaf, 
+  FaWeightHanging, FaMoneyBillWave, FaCalendarAlt, 
+  FaTint, FaCalendarCheck, FaTemperatureHigh, FaWater,
+  FaCogs, FaBox, FaWarehouse, FaStar, FaInfoCircle, 
+  FaCheck, FaTrashAlt, FaTimes
+} from 'react-icons/fa';
 
 const StockModal = ({ stock, isEditing, setStocks, closeModal }) => {
   const [formData, setFormData] = useState({ ...stock });
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
   useEffect(() => {
-    console.log("Stock Data Received:", stock);
     if (stock) {
       setFormData({ ...stock });
     }
@@ -78,11 +88,13 @@ const StockModal = ({ stock, isEditing, setStocks, closeModal }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     // Validate form data
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      setIsSubmitting(false);
       return;
     }
 
@@ -101,299 +113,420 @@ const StockModal = ({ stock, isEditing, setStocks, closeModal }) => {
         const updatedStocks = await axios.get('http://localhost:5000/api/get-stocks');
         setStocks(updatedStocks.data);
         closeModal();
-        alert('Stock updated successfully');
       }
     } catch (error) {
       console.error('Error updating stock:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleDelete = async () => {
+  const confirmDelete = async () => {
+    setIsDeleting(true);
     try {
       await axios.delete(`http://localhost:5000/api/delete-stock/${formData._id}`);
       const updatedStocks = await axios.get('http://localhost:5000/api/get-stocks');
       setStocks(updatedStocks.data);
       closeModal();
-      alert('Stock deleted successfully');
     } catch (error) {
       console.error('Error deleting stock:', error);
+    } finally {
+      setIsDeleting(false);
+      setShowConfirmDelete(false);
     }
   };
 
+  // Form field component to maintain consistent styling
+  const FormField = ({ label, name, value, type = 'text', icon, error, disabled = !isEditing }) => {
+    return (
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+          {icon && <span className="mr-2 text-green-600">{icon}</span>}
+          {label}
+        </label>
+        {type === 'textarea' ? (
+          <textarea
+            name={name}
+            value={value || ''}
+            onChange={handleChange}
+            disabled={disabled}
+            className="w-full p-3 border bg-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+            rows="3"
+          />
+        ) : (
+          <div className="relative">
+            <input
+              type={type}
+              name={name}
+              value={value || ''}
+              onChange={handleChange}
+              disabled={disabled}
+              min={type === 'number' ? 0 : undefined}
+              className={`w-full p-3 pr-4 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500 ${
+                error ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+          </div>
+        )}
+        {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      </div>
+    );
+  };
+
+  // Create sections for better organization
+  const Section = ({ title, children }) => (
+    <div className="mb-6">
+      <h3 className="text-lg font-semibold text-green-700 border-b border-gray-200 pb-2 mb-4">{title}</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+        {children}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-800 bg-opacity-50 mt-16">
-      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-4xl overflow-y-auto max-h-[80vh]">
-        <h2 className="text-3xl font-semibold mb-6 text-center">View or Edit Stock Details</h2>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4"
+    >
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ type: 'spring', damping: 25 }}
+        className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+      >
+        {/* Modal Header */}
+        <div className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4 flex justify-between items-center">
+          <h2 className="text-2xl font-bold">
+            {isEditing ? 'Edit Stock Details' : 'View Stock Details'}
+          </h2>
+          <button 
+            onClick={closeModal}
+            className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors focus:outline-none"
+          >
+            <FaTimes size={20} />
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="font-bold">Farmer Name:</p>
-              <input
-                type="text"
-                name="farmerName"
-                value={formData.farmerName}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                placeholder="Enter farmer's name"
-                disabled={!isEditing}
+        {/* Modal Body */}
+        <div className="p-6 overflow-y-auto">
+          <form onSubmit={handleSubmit}>
+            {/* Farmer Information */}
+            <Section title="Farmer Information">
+              <FormField 
+                label="Farmer Name" 
+                name="farmerName" 
+                value={formData.farmerName} 
+                error={errors.farmerName}
+                icon={<FaUser />}
               />
-              {errors.farmerName && <p className="text-red-500">{errors.farmerName}</p>}
-            </div>
-
-            <div>
-              <p className="font-bold">Farmer Email:</p>
-              <input
+              <FormField 
+                label="Farmer ID" 
+                name="farmerId" 
+                value={formData.farmerId} 
+                error={errors.farmerId}
+                icon={<FaInfoCircle />}
+              />
+              <FormField 
+                label="Farmer Email" 
+                name="farmerEmail" 
                 type="email"
-                name="farmerEmail"
-                value={formData.farmerEmail}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                placeholder="Enter farmer's email"
-                disabled={!isEditing}
+                value={formData.farmerEmail} 
+                error={errors.farmerEmail}
+                icon={<FaEnvelope />}
               />
-              {errors.farmerEmail && <p className="text-red-500">{errors.farmerEmail}</p>}
-            </div>
+            </Section>
 
-            <div>
-              <p className="font-bold">Crop Type:</p>
-              <input
-                type="text"
-                name="cropType"
-                value={formData.cropType}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                disabled={!isEditing}
+            {/* Crop Information */}
+            <Section title="Crop Information">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <span className="mr-2 text-green-600"><FaSeedling /></span>
+                  Crop Type
+                </label>
+                <div className="relative">
+                  <select
+                    name="cropType"
+                    value={formData.cropType || ''}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                  >
+                    <option value="paddy">Paddy</option>
+                    <option value="rice">Rice</option>
+                  </select>
+                </div>
+              </div>
+              
+              <FormField 
+                label="Variety" 
+                name="variety" 
+                value={formData.variety} 
+                error={errors.variety}
+                icon={<FaLeaf />}
               />
-            </div>
+            </Section>
 
-            <div>
-              <p className="font-bold">Variety:</p>
-              <input
-                type="text"
-                name="variety"
-                value={formData.variety}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                disabled={!isEditing}
+            {/* Stock Details */}
+            <Section title="Stock Details">
+              <FormField 
+                label="Quantity" 
+                name="quantity" 
+                type="number"
+                value={formData.quantity} 
+                error={errors.quantity}
+                icon={<FaWeightHanging />}
               />
-              {errors.variety && <p className="text-red-500">{errors.variety}</p>}
-            </div>
-
-            <div>
-  <p className="font-bold">Quantity:</p>
-  <input
-    type="number"
-    name="quantity"
-    value={formData.quantity}
-    onChange={(e) => {
-      const value = e.target.value;
-      // Prevent setting a negative quantity
-      if (value >= 0 || value === '') {
-        handleChange(e);
-      }
-    }}
-    className="w-full p-2 border border-gray-300 rounded-md"
-    disabled={!isEditing}
-  />
-  {errors.quantity && <p className="text-red-500">{errors.quantity}</p>}
-</div>
-
-
-            <div>
-  <p className="font-bold">Price:</p>
-  <input
-    type="number"
-    name="price"
-    value={formData.price}
-    onChange={(e) => {
-      const value = e.target.value;
-      // Prevent setting a negative price
-      if (value >= 0 || value === '') {
-        handleChange(e);
-      }
-    }}
-    className="w-full p-2 border border-gray-300 rounded-md"
-    disabled={!isEditing}
-  />
-  {errors.price && <p className="text-red-500">{errors.price}</p>}
-</div>
-
-
-            <div>
-              <p className="font-bold">Stock Date:</p>
-              <input
+              <FormField 
+                label="Price (Rs)" 
+                name="price" 
+                type="number"
+                value={formData.price} 
+                error={errors.price}
+                icon={<FaMoneyBillWave />}
+              />
+              <FormField 
+                label="Stock Date" 
+                name="stockDate" 
                 type="date"
-                name="stockDate"
                 value={formatDate(formData.stockDate)}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                disabled={!isEditing}
+                error={errors.stockDate}
+                icon={<FaCalendarAlt />}
               />
-              {errors.stockDate && <p className="text-red-500">{errors.stockDate}</p>}
-            </div>
+            </Section>
 
-            {/* Additional fields for Paddy and Rice */}
+            {/* Crop-Specific Information */}
             {formData.cropType === 'paddy' && (
-              <>
-                <div>
-                  <p className="font-bold">Moisture Level:</p>
-                  <input
-                    type="number"
-                    name="moistureLevel"
-                    value={formData.moistureLevel}
-                    onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    disabled={!isEditing}
-                  />
-                </div>
-
-                <div>
-                  <p className="font-bold">Harvested Date:</p>
-                  <input
-                    type="date"
-                    name="harvestedDate"
-                    value={formatDate(formData.harvestedDate)}
-                    onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    disabled={!isEditing}
-                  />
-                </div>
-
-                <div>
-                  <p className="font-bold">Storage Temperature:</p>
-                  <input
-                    type="number"
-                    name="storageTemperature"
-                    value={formData.storageTemperature}
-                    onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    disabled={!isEditing}
-                  />
-                </div>
-
-                <div>
-                  <p className="font-bold">Storage Humidity:</p>
-                  <input
-                    type="number"
-                    name="storageHumidity"
-                    value={formData.storageHumidity}
-                    onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    disabled={!isEditing}
-                  />
-                </div>
-              </>
+              <Section title="Paddy-Specific Details">
+                <FormField 
+                  label="Moisture Level (%)" 
+                  name="moistureLevel" 
+                  type="number"
+                  value={formData.moistureLevel} 
+                  icon={<FaTint />}
+                />
+                <FormField 
+                  label="Harvested Date" 
+                  name="harvestedDate" 
+                  type="date"
+                  value={formatDate(formData.harvestedDate)}
+                  icon={<FaCalendarCheck />}
+                />
+                <FormField 
+                  label="Storage Temperature (°C)" 
+                  name="storageTemperature" 
+                  type="number"
+                  value={formData.storageTemperature} 
+                  icon={<FaTemperatureHigh />}
+                />
+                <FormField 
+                  label="Storage Humidity (%)" 
+                  name="storageHumidity" 
+                  type="number"
+                  value={formData.storageHumidity} 
+                  icon={<FaWater />}
+                />
+              </Section>
             )}
 
             {formData.cropType === 'rice' && (
-              <>
+              <Section title="Rice-Specific Details">
                 <div>
-                  <p className="font-bold">Processing Type:</p>
-                  <input
-                    type="text"
+                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                    <span className="mr-2 text-green-600"><FaCogs /></span>
+                    Processing Type
+                  </label>
+                  <select
                     name="processingType"
-                    value={formData.processingType}
+                    value={formData.processingType || ''}
                     onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
                     disabled={!isEditing}
-                  />
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                  >
+                    <option value="">Select processing type</option>
+                    <option value="raw">Raw</option>
+                    <option value="parboiled">Parboiled</option>
+                    <option value="polished">Polished</option>
+                  </select>
+                  {errors.processingType && <p className="mt-1 text-sm text-red-500">{errors.processingType}</p>}
                 </div>
-
                 <div>
-                  <p className="font-bold">Packaging Type:</p>
-                  <input
-                    type="text"
+                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                    <span className="mr-2 text-green-600"><FaBox /></span>
+                    Packaging Type
+                  </label>
+                  <select
                     name="packagingType"
-                    value={formData.packagingType}
+                    value={formData.packagingType || ''}
                     onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
                     disabled={!isEditing}
-                  />
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                  >
+                    <option value="">Select packaging type</option>
+                    <option value="sack">Sack</option>
+                    <option value="box">Box</option>
+                    <option value="loose">Loose</option>
+                  </select>
+                  {errors.packagingType && <p className="mt-1 text-sm text-red-500">{errors.packagingType}</p>}
                 </div>
-              </>
+              </Section>
             )}
 
-            <div>
-              <p className="font-bold">Storage Location:</p>
-              <input
-                type="text"
-                name="storageLocation"
-                value={formData.storageLocation}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                disabled={!isEditing}
+            {/* Inventory Details */}
+            <Section title="Inventory Details">
+              <FormField 
+                label="Storage Location" 
+                name="storageLocation" 
+                value={formData.storageLocation} 
+                error={errors.storageLocation}
+                icon={<FaWarehouse />}
               />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <span className="mr-2 text-green-600"><FaStar /></span>
+                  Quality Grade
+                </label>
+                <select
+                  name="qualityGrade"
+                  value={formData.qualityGrade || ''}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                >
+                  <option value="A">A - Premium</option>
+                  <option value="B">B - Standard</option>
+                  <option value="C">C - Basic</option>
+                  <option value="premium">Premium</option>
+                  <option value="standard">Standard</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select
+                  name="status"
+                  value={formData.status || ''}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                >
+                  <option value="available">Available</option>
+                  <option value="soldOut">Sold Out</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <FormField 
+                  label="Description / Notes" 
+                  name="description" 
+                  value={formData.description}
+                  type="textarea"
+                  icon={<FaInfoCircle />}
+                />
+              </div>
+            </Section>
+          </form>
+        </div>
 
-            <div>
-              <p className="font-bold">Quality Grade:</p>
-              <input
-                type="text"
-                name="qualityGrade"
-                value={formData.qualityGrade}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                disabled={!isEditing}
-              />
-            </div>
-
-            <div>
-              <p className="font-bold">Status:</p>
-              <input
-                type="text"
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                disabled={!isEditing}
-              />
-            </div>
-
-            <div className="col-span-2">
-              <p className="font-bold">Description:</p>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                disabled={!isEditing}
-              />
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          {isEditing && (
-            <div className="flex justify-between mt-6">
-              <button
-                type="submit"
-                className="bg-blue-500 text-white p-2 rounded-md w-full mr-2"
-              >
-                Save Changes
-              </button>
+        {/* Modal Footer with Actions */}
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+          <div>
+            {isEditing && (
               <button
                 type="button"
-                onClick={handleDelete}
-                className="bg-red-500 text-white p-2 rounded-md w-full ml-2"
+                onClick={() => setShowConfirmDelete(true)}
+                disabled={isSubmitting || isDeleting}
+                className="inline-flex items-center px-4 py-2 border border-red-600 text-sm font-medium rounded-md text-red-600 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
               >
-                Delete Stock
+                <FaTrashAlt className="mr-2" />
+                Delete
               </button>
-            </div>
-          )}
-
-          {/* Close Button */}
-          <div className="mt-4 text-right">
+            )}
+          </div>
+          <div className="flex space-x-3">
             <button
               type="button"
               onClick={closeModal}
-              className="bg-gray-500 text-white p-2 rounded-md"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
             >
-              Close
+              {isEditing ? 'Cancel' : 'Close'}
             </button>
+            
+            {isEditing && (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="inline-flex items-center px-5 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+              >
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <FaCheck className="mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </button>
+            )}
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+
+        {/* Delete Confirmation Dialog */}
+        {showConfirmDelete && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-white rounded-lg shadow-xl p-6 m-4 max-w-sm w-full"
+            >
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mx-auto mb-4">
+                <FaTrashAlt className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 text-center mb-2">Delete Stock</h3>
+              <p className="text-sm text-gray-500 text-center mb-6">
+                Are you sure you want to delete this stock item? This action cannot be undone.
+              </p>
+              <div className="flex justify-center space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmDelete(false)}
+                  className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDelete}
+                  disabled={isDeleting}
+                  className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  {isDeleting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete'
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
   );
 };
 

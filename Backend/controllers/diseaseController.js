@@ -1,6 +1,13 @@
 const Disease = require('../models/diseaseModel');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+
+// Ensure uploads directory exists
+const uploadDir = 'uploads';
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
 
 // Configure multer for image upload
 const storage = multer.diskStorage({
@@ -12,7 +19,42 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        const filetypes = /jpeg|jpg|png/;
+        const mimetype = filetypes.test(file.mimetype);
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+        cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+    }
+});
+
+// Handle image upload for disease detection
+const uploadImage = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No image file provided' });
+        }
+
+        // Create the image URL
+        const imageUrl = `/uploads/${req.file.filename}`;
+        
+        res.status(200).json({
+            message: 'Image uploaded successfully',
+            imageUrl: imageUrl
+        });
+    } catch (err) {
+        console.error('Upload error:', err);
+        res.status(500).json({ message: err.message });
+    }
+};
 
 // External API request function
 const fetchExternalDiseases = async (affectedParts, symptoms) => {
@@ -151,5 +193,6 @@ module.exports = {
     updateDisease,
     deleteDisease,
     searchDisease,
-    upload
+    upload,
+    uploadImage
 };

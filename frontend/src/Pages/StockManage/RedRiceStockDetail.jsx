@@ -7,13 +7,14 @@ import {
   FaRulerHorizontal, FaTint, FaTemperatureHigh,
   FaSearch
 } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
-const StockDetailPage = () => {
+const RedRiceStockDetail = () => {
   const [stocks, setStocks] = useState([]);
   const [cart, setCart] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState(null);
-  const [filter, setFilter] = useState("Rice"); // Filter for Rice or Paddy
+  const [filter, setFilter] = useState("Rice");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState(null);
@@ -24,28 +25,9 @@ const StockDetailPage = () => {
   
   const modalRef = useRef();
   const searchRef = useRef();
-  
-  // Determine variety from filename - extract the variety name from the file name
-  const getVarietyFromFileName = () => {
-    const path = window.location.pathname;
-    const fileName = path.split('/').pop().replace('-stock-detail', '');
-    
-    // Map filename to proper variety name
-    const varietyMap = {
-      'nadu': 'Nadu',
-      'samba': 'Samba',
-      'bg352': 'BG352',
-      'pachcha': 'Pachcha',
-      'redrice': 'Red Rice',
-      'suwandel': 'Suwandel'
-    };
-    
-    return varietyMap[fileName.toLowerCase()] || fileName;
-  };
-  
-  const variety = getVarietyFromFileName();
+  const currentVariety = "Red Rice";
 
-  // Fetch stock data and initialize cart
+  // Fetch stock data from backend
   useEffect(() => {
     const fetchStocks = async () => {
       try {
@@ -68,29 +50,7 @@ const StockDetailPage = () => {
     setCart(storedCart);
   }, []);
 
-  // Add click outside modal to close
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        closeModal();
-      }
-
-      // Close search results when clicking outside
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setShowSearchResults(false);
-      }
-    };
-    
-    if (modalOpen || showSearchResults) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [modalOpen, showSearchResults]);
-
-  // Handle search
+  // Handle search input changes
   useEffect(() => {
     if (searchTerm.trim() === '') {
       setSearchResults([]);
@@ -107,9 +67,31 @@ const StockDetailPage = () => {
     setSearchResults(results);
   }, [searchTerm, stocks]);
 
+  // Add click outside modal to close
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        closeModal();
+      }
+      
+      // Close search results when clicking outside
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearchResults(false);
+      }
+    };
+    
+    if (modalOpen || showSearchResults) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [modalOpen, showSearchResults]);
+
   // Filter stocks based on selected filter and variety
   const filteredStocks = stocks.filter(
-    (stock) => stock.variety === variety && stock.cropType.toLowerCase() === filter.toLowerCase()
+    (stock) => stock.variety === currentVariety && stock.cropType.toLowerCase() === filter.toLowerCase()
   );
 
   // Get product image based on variety
@@ -123,7 +105,7 @@ const StockDetailPage = () => {
       'Suwandel': '/shopImg/suwandel.jpg'
     };
     
-    return varietyMap[variety] || '/shopImg/nadu.jpg'; // Default image if variety not found
+    return varietyMap[variety] || '/shopImg/redrice.jpg';
   };
 
   // Handle quantity change (increase/decrease)
@@ -139,18 +121,11 @@ const StockDetailPage = () => {
 
   // Handle quantity selection for adding to cart
   const handleSelectedQuantityChange = (change) => {
-    setSelectedQuantity(prev => {
-      const newQuantity = prev + change;
-      // Make sure quantity is at least 1 and no more than available stock
-      return Math.max(1, Math.min(newQuantity, selectedStock?.quantity || 0));
-    });
+    setSelectedQuantity(prev => Math.max(1, Math.min(prev + change, selectedStock?.quantity || 10)));
   };
 
   const handleViewDetails = (stock) => {
-    // Get the most up-to-date stock information
-    const currentStock = stocks.find(s => s._id === stock._id) || stock;
-    
-    setSelectedStock(currentStock);
+    setSelectedStock(stock);
     setSelectedQuantity(1);
     setModalOpen(true);
     setShowSearchResults(false);
@@ -188,17 +163,8 @@ const StockDetailPage = () => {
     // Save updated cart to localStorage
     localStorage.setItem("cart", JSON.stringify(currentCart));
     
-    // Update component state for cart
+    // Update component state
     setCart(currentCart);
-    
-    // Update local stocks state to show decreased quantity
-    setStocks(prevStocks => 
-      prevStocks.map(item => 
-        item._id === stock._id 
-          ? { ...item, quantity: Math.max(0, item.quantity - quantity) } 
-          : item
-      )
-    );
     
     // Show notification
     setNotification({
@@ -229,37 +195,19 @@ const StockDetailPage = () => {
   };
 
   // Get variety description based on name
-  const getVarietyDescription = (variety) => {
-    const descriptions = {
-      'Nadu': 'Popular for dry zones, moderate growth, high yield. Known for its adaptability to various cooking styles.',
-      'Samba': 'Fragrant, fine grain, needs longer growth period. A premium variety with exceptional taste and aroma.',
-      'BG352': 'Hybrid rice, high yield, adaptable to many climates. Developed for maximum productivity.',
-      'Pachcha': 'A nutritious, traditional variety with low water needs and excellent taste profile.',
-      'Red Rice': 'Nutritious, traditional variety, packed with antioxidants and essential minerals.',
-      'Suwandel': 'Fragrant and soft, a premium traditional rice variety cherished for its delicate flavor.'
-    };
-    
-    return descriptions[variety] || 'A high-quality variety of rice with excellent nutritional value.';
+  const getVarietyDescription = () => {
+    return 'Nutritious, traditional variety, packed with antioxidants and essential minerals. Known for its health benefits and rich, earthy flavor.';
   };
 
   // Determine dynamic background color based on variety
-  const getBackgroundGradient = (variety) => {
-    const gradients = {
-      'Nadu': 'from-amber-50 via-white to-amber-100',
-      'Samba': 'from-blue-50 via-white to-blue-100',
-      'BG352': 'from-green-50 via-white to-green-100',
-      'Pachcha': 'from-emerald-50 via-white to-emerald-100',
-      'Red Rice': 'from-red-50 via-white to-red-100',
-      'Suwandel': 'from-yellow-50 via-white to-yellow-100'
-    };
-    
-    return gradients[variety] || 'from-green-50 via-white to-green-100';
+  const getBackgroundGradient = () => {
+    return 'from-red-50 via-white to-red-100';
   };
 
   const renderStars = (rating) => {
     const stars = [];
-    const fullStars = Math.floor(rating || 4.5);
-    const hasHalfStar = (rating || 4.5) - fullStars >= 0.5;
+    const fullStars = Math.floor(rating || 4.8);
+    const hasHalfStar = (rating || 4.8) - fullStars >= 0.5;
     
     // Full stars
     for (let i = 0; i < fullStars; i++) {
@@ -292,7 +240,7 @@ const StockDetailPage = () => {
     if (type.toLowerCase() === 'rice') {
       return [
         { icon: <FaTint className="text-blue-500" />, text: 'Ready to Cook' },
-        { icon: <FaLeaf className="text-green-500" />, text: 'Processed Quality' },
+        { icon: <FaLeaf className="text-green-500" />, text: 'Nutrient Rich' },
         { icon: <FaStar className="text-yellow-500" />, text: 'Premium Grade' }
       ];
     } else {
@@ -305,7 +253,7 @@ const StockDetailPage = () => {
   };
 
   return (
-    <div className={`bg-gradient-to-br ${getBackgroundGradient(variety)} min-h-screen font-sans`}>
+    <div className={`bg-gradient-to-br ${getBackgroundGradient()} min-h-screen font-sans`}>
       {/* Notification */}
       <AnimatePresence>
         {notification && (
@@ -325,11 +273,11 @@ const StockDetailPage = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           {/* Breadcrumb */}
           <div className="mb-4 md:mb-0 flex items-center text-sm text-gray-600">
-            <a href="/shop" className="hover:text-green-600 transition">Shop</a>
+            <Link to="/shop" className="hover:text-green-600 transition">Shop</Link>
             <FaChevronRight className="mx-2 text-xs" />
-            <a href="#" className="hover:text-green-600 transition">Rice Varieties</a>
+            <Link to="/shop" className="hover:text-green-600 transition">Rice Varieties</Link>
             <FaChevronRight className="mx-2 text-xs" />
-            <span className="text-gray-800 font-medium">{variety}</span>
+            <span className="text-gray-800 font-medium">{currentVariety}</span>
           </div>
           
           {/* Search Bar */}
@@ -395,8 +343,8 @@ const StockDetailPage = () => {
 
           <div className="flex items-center">
             {/* Cart Indicator */}
-            <a 
-              href="/cart" 
+            <Link 
+              to="/cart" 
               className="ml-4 relative group bg-white p-3 rounded-full shadow-sm hover:shadow-md transition-all duration-300"
             >
               <FaShoppingCart className="text-green-600 text-xl" />
@@ -408,7 +356,7 @@ const StockDetailPage = () => {
               <span className="absolute opacity-0 group-hover:opacity-100 -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap transition-opacity duration-300">
                 View Cart
               </span>
-            </a>
+            </Link>
           </div>
         </div>
         
@@ -422,8 +370,8 @@ const StockDetailPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <h1 className="text-5xl sm:text-6xl font-extrabold mb-4 drop-shadow-lg">{variety}</h1>
-              <p className="text-lg sm:text-xl font-light mb-8">{getVarietyDescription(variety)}</p>
+              <h1 className="text-5xl sm:text-6xl font-extrabold mb-4 drop-shadow-lg">{currentVariety}</h1>
+              <p className="text-lg sm:text-xl font-light mb-8">{getVarietyDescription()}</p>
               <div className="flex flex-wrap gap-3">
                 <button 
                   onClick={() => setFilter("Rice")}
@@ -453,7 +401,7 @@ const StockDetailPage = () => {
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <svg className="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
@@ -466,7 +414,7 @@ const StockDetailPage = () => {
               <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
                 <FaLeaf className="text-4xl text-green-300" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-700 mb-2">No {variety} {filter.toLowerCase()} available</h2>
+              <h2 className="text-2xl font-bold text-gray-700 mb-2">No {currentVariety} {filter.toLowerCase()} available</h2>
               <p className="text-gray-600 mb-8">We're currently out of stock of this variety. Check back soon!</p>
               <button
                 onClick={() => setFilter(filter === "Rice" ? "Paddy" : "Rice")}
@@ -481,7 +429,7 @@ const StockDetailPage = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <h2 className="text-3xl font-bold mb-8 text-center">Available {variety} {filter}</h2>
+              <h2 className="text-3xl font-bold mb-8 text-center">Available {currentVariety} {filter}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredStocks.map((stock) => (
                   <motion.div
@@ -511,7 +459,7 @@ const StockDetailPage = () => {
                           {stock.cropType}
                         </span>
                         <div className="flex items-center">
-                          {renderStars(4.7)}
+                          {renderStars(4.8)}
                         </div>
                       </div>
                       
@@ -569,9 +517,9 @@ const StockDetailPage = () => {
           <h2 className="text-3xl font-bold mb-8 text-center">You Might Also Like</h2>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {['Nadu', 'Samba', 'Red Rice', 'BG352'].filter(v => v !== variety).slice(0, 4).map((relatedVariety, idx) => (
-              <a 
-                href={`/${relatedVariety.toLowerCase().replace(' ', '-')}-stock-detail`}
+            {['Nadu', 'Samba', 'Pachcha', 'BG352'].filter(v => v !== currentVariety).slice(0, 4).map((relatedVariety, idx) => (
+              <Link 
+                to={`/${relatedVariety.toLowerCase().replace(' ', '-')}-stock-detail`}
                 key={idx}
                 className="group"
               >
@@ -596,7 +544,7 @@ const StockDetailPage = () => {
                     <span className="text-green-700 font-semibold">View Products</span>
                   </div>
                 </motion.div>
-              </a>
+              </Link>
             ))}
           </div>
         </section>
@@ -648,8 +596,8 @@ const StockDetailPage = () => {
                         {selectedStock.cropType}
                       </span>
                       <div className="ml-4 flex items-center">
-                        {renderStars(4.7)}
-                        <span className="ml-2 text-sm text-gray-600">(47 reviews)</span>
+                        {renderStars(4.8)}
+                        <span className="ml-2 text-sm text-gray-600">(58 reviews)</span>
                       </div>
                     </div>
                   </div>
@@ -765,4 +713,4 @@ const StockDetailPage = () => {
   );
 };
 
-export default StockDetailPage;
+export default RedRiceStockDetail;
