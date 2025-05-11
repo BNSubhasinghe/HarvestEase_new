@@ -89,7 +89,6 @@ export default function AdminFinancialDashboard() {
   const [activeTab, setActiveTab] = useState('1');
   const [dateRange, setDateRange] = useState([dayjs().subtract(1, 'month'), dayjs()]);
   const [cropFilter, setCropFilter] = useState('all');
-  const [farmerFilter, setFarmerFilter] = useState('all');
   const [regionFilter, setRegionFilter] = useState('all');
   const [alertSettings, setAlertSettings] = useState({
     unusualSpending: true,
@@ -154,12 +153,6 @@ export default function AdminFinancialDashboard() {
       onClick: () => setView('analysis')
     },
     {
-      key: 'reports',
-      icon: <FileSyncOutlined />,
-      label: 'Reporting',
-      onClick: () => setView('reports')
-    },
-    {
       key: 'settings',
       icon: <SettingOutlined />,
       label: 'Financial Settings',
@@ -178,8 +171,8 @@ export default function AdminFinancialDashboard() {
       if (sale.cropType) {
         data[sale.cropType] = data[sale.cropType] || { revenue: 0, expenses: 0, farmers: new Set() };
         data[sale.cropType].revenue += sale.quantity * sale.price;
-        if (sale.farmerId) {
-          data[sale.cropType].farmers.add(sale.farmerId);
+        if (sale.user) { // Changed from sale.farmerId to sale.user
+          data[sale.cropType].farmers.add(sale.user);
         }
       }
     });
@@ -187,8 +180,8 @@ export default function AdminFinancialDashboard() {
     expenses.forEach(expense => {
       if (expense.crop && data[expense.crop]) {
         data[expense.crop].expenses += expense.amount;
-        if (expense.farmerId) {
-          data[expense.crop].farmers.add(expense.farmerId);
+        if (expense.user) { // Changed from expense.farmerId to expense.user
+          data[expense.crop].farmers.add(expense.user);
         }
       } else if (!expense.crop) {
         const cropsWithRevenue = Object.keys(data).filter(crop => data[crop].revenue > 0);
@@ -196,8 +189,8 @@ export default function AdminFinancialDashboard() {
           const amountPerCrop = expense.amount / cropsWithRevenue.length;
           cropsWithRevenue.forEach(crop => {
             data[crop].expenses += amountPerCrop;
-            if (expense.farmerId) {
-              data[crop].farmers.add(expense.farmerId);
+            if (expense.user) { // Changed from expense.farmerId to expense.user
+              data[crop].farmers.add(expense.user);
             }
           });
         }
@@ -215,32 +208,36 @@ export default function AdminFinancialDashboard() {
 
   const calculateFarmerPerformance = () => {
     const farmerMap = {};
-    
+  
+    // Initialize all farmers with default values
     farmers.forEach(farmer => {
       farmerMap[farmer._id] = {
         name: farmer.name,
-        region: farmer.region,
+        region: farmer.region || 'Unknown',
         revenue: 0,
         expenses: 0,
         salesCount: 0,
         expenseCount: 0
       };
     });
-
+  
+    // Calculate revenue from sales
     sales.forEach(sale => {
-      if (sale.farmerId && farmerMap[sale.farmerId]) {
-        farmerMap[sale.farmerId].revenue += sale.quantity * sale.price;
-        farmerMap[sale.farmerId].salesCount += 1;
+      if (sale.user && farmerMap[sale.user]) {
+        farmerMap[sale.user].revenue += (sale.quantity || 0) * (sale.price || 0);
+        farmerMap[sale.user].salesCount += 1;
       }
     });
-
+  
+    // Calculate expenses
     expenses.forEach(expense => {
-      if (expense.farmerId && farmerMap[expense.farmerId]) {
-        farmerMap[expense.farmerId].expenses += expense.amount;
-        farmerMap[expense.farmerId].expenseCount += 1;
+      if (expense.user && farmerMap[expense.user]) {
+        farmerMap[expense.user].expenses += expense.amount || 0;
+        farmerMap[expense.user].expenseCount += 1;
       }
     });
-
+  
+    // Convert to array and calculate profit/ROI
     return Object.entries(farmerMap).map(([id, data]) => ({
       id,
       ...data,
@@ -331,66 +328,25 @@ export default function AdminFinancialDashboard() {
     try {
       const [salesResponse, expensesResponse, farmersResponse] = await Promise.all([
         fetch('http://localhost:5000/api/admin/sales').then(res => res.json()),
-        fetch(`http://localhost:5000/api/admin/expenses`).then(res => res.json()),
+        fetch('http://localhost:5000/api/admin/expenses').then(res => res.json()),
         fetch('http://localhost:5000/api/admin/farmers').then(res => res.json())
       ]);
+
+      console.log('Sales data:', salesResponse);
+      console.log('Expenses data:', expensesResponse);
+      console.log('Farmers data:', farmersResponse);
 
       setSales(Array.isArray(salesResponse) ? salesResponse : []);
       setExpenses(Array.isArray(expensesResponse) ? expensesResponse : []);
       setFarmers(Array.isArray(farmersResponse) ? farmersResponse : []);
 
-
-      let filteredSales = Array.isArray(salesResponse) ? salesResponse : [];
-      let filteredExpenses = Array.isArray(expensesResponse) ? expensesResponse : [];
-      let filteredFarmers = Array.isArray(farmersResponse) ? farmersResponse : [];
-
-      if (Array.isArray(dateRange)) {
-        const [startDate, endDate] = dateRange;
-        if (startDate && endDate) {
-          filteredSales = filteredSales.filter(sale => {
-            const saleDate = dayjs(sale.date);
-            return saleDate.isAfter(startDate.startOf('day')) && 
-                   saleDate.isBefore(endDate.endOf('day'));
-          });
-          
-          filteredExpenses = filteredExpenses.filter(expense => {
-            const expenseDate = dayjs(expense.date);
-            return expenseDate.isAfter(startDate.startOf('day')) && 
-                   expenseDate.isBefore(endDate.endOf('day'));
-          });
-        }
-      }
-
-      if (cropFilter !== 'all') {
-        filteredSales = filteredSales.filter(sale => sale.cropType === cropFilter);
-        filteredExpenses = filteredExpenses.filter(expense => expense.crop === cropFilter);
-      }
-
-      if (farmerFilter !== 'all') {
-        filteredSales = filteredSales.filter(sale => sale.farmerId === farmerFilter);
-        filteredExpenses = filteredExpenses.filter(expense => expense.farmerId === farmerFilter);
-      }
-
-      if (regionFilter !== 'all') {
-        const farmerIdsInRegion = filteredFarmers
-          .filter(f => f.region === regionFilter)
-          .map(f => f._id);
-        
-        filteredSales = filteredSales.filter(sale => farmerIdsInRegion.includes(sale.farmerId));
-        filteredExpenses = filteredExpenses.filter(expense => farmerIdsInRegion.includes(expense.farmerId));
-      }
-
-      setSales(filteredSales);
-      setExpenses(filteredExpenses);
-      setFarmers(filteredFarmers);
-      
-      const revenue = filteredSales.reduce((sum, sale) => sum + (sale.quantity * sale.price), 0);
-      const expensesTotal = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+      const revenue = salesResponse.reduce((sum, sale) => sum + ((sale.quantity || 0) * (sale.price || 0)), 0);
+      const expensesTotal = expensesResponse.reduce((sum, expense) => sum + (expense.amount || 0), 0);
       const profit = revenue - expensesTotal;
       const roi = expensesTotal > 0 ? (profit / expensesTotal * 100) : 0;
-      
+
       const farmerPerformance = calculateFarmerPerformance();
-      const topPerformer = farmerPerformance.length > 0 
+      const topPerformer = farmerPerformance.length > 0
         ? farmerPerformance.reduce((max, farmer) => farmer.profit > max.profit ? farmer : max, farmerPerformance[0])
         : null;
 
@@ -399,8 +355,8 @@ export default function AdminFinancialDashboard() {
         expenses: expensesTotal,
         profit,
         roi: parseFloat(roi.toFixed(2)),
-        farmerCount: filteredFarmers.length,
-        avgProfit: filteredFarmers.length > 0 ? profit / filteredFarmers.length : 0,
+        farmerCount: farmersResponse.length,
+        avgProfit: farmersResponse.length > 0 ? profit / farmersResponse.length : 0,
         topPerformer
       });
 
@@ -414,7 +370,27 @@ export default function AdminFinancialDashboard() {
 
   useEffect(() => { 
     fetchData(); 
-  }, [dateRange, cropFilter, farmerFilter, regionFilter]);
+  }, [dateRange, cropFilter, regionFilter]);
+
+  useEffect(() => {
+    const farmerPerformance = calculateFarmerPerformance().sort((a, b) => b.profit - a.profit);
+    if (farmerPerformance.length > 0) {
+      const topPerformer = farmerPerformance[0];
+      if (!profitData.topPerformer || profitData.topPerformer.id !== topPerformer.id) {
+        setProfitData(prev => ({
+          ...prev,
+          topPerformer
+        }));
+      }
+    } else {
+      if (profitData.topPerformer) {
+        setProfitData(prev => ({
+          ...prev,
+          topPerformer: null
+        }));
+      }
+    }
+  }, [sales, expenses, farmers]);
 
   const generateSystemReport = async () => {
     try {
@@ -922,6 +898,52 @@ export default function AdminFinancialDashboard() {
     ]
   };
 
+  const farmerPerformanceBarData = {
+    labels: calculateFarmerPerformance().map(farmer => farmer.name),
+    datasets: [
+      {
+        label: 'Revenue (Rs)',
+        data: calculateFarmerPerformance().map(farmer => farmer.revenue),
+        backgroundColor: 'rgba(46, 204, 113, 0.7)',
+        borderColor: 'rgba(46, 204, 113, 1)',
+        borderWidth: 1
+      },
+      {
+        label: 'Expenses (Rs)',
+        data: calculateFarmerPerformance().map(farmer => farmer.expenses),
+        backgroundColor: 'rgba(231, 76, 60, 0.7)',
+        borderColor: 'rgba(231, 76, 60, 1)',
+        borderWidth: 1
+      },
+      {
+        label: 'Profit (Rs)',
+        data: calculateFarmerPerformance().map(farmer => farmer.profit),
+        backgroundColor: 'rgba(52, 152, 219, 0.7)',
+        borderColor: 'rgba(52, 152, 219, 1)',
+        borderWidth: 1
+      }
+    ]
+  };
+
+  const [searchText, setSearchText] = useState(''); // Initialize searchText state
+  const [salesSearchText, setSalesSearchText] = useState(''); // State for sales search
+  const [expensesSearchText, setExpensesSearchText] = useState(''); // State for expenses search
+
+  const filteredFarmers = farmers.filter(farmer =>
+    farmer.name.toLowerCase().includes(searchText.toLowerCase()) ||
+    farmer.email.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const filteredSales = sales.filter(sale => {
+    const farmer = farmers.find(f => f._id === sale.user);
+    return farmer && farmer.name.toLowerCase().includes(salesSearchText.toLowerCase());
+  });
+
+  const filteredExpenses = expenses.filter(expense => {
+    const farmer = farmers.find(f => f._id === expense.user);
+    return farmer && farmer.name.toLowerCase().includes(expensesSearchText.toLowerCase());
+  });
+
   const renderContent = () => {
     const cropProfitData = calculateSystemProfitData();
     const farmerPerformance = calculateFarmerPerformance();
@@ -989,18 +1011,13 @@ export default function AdminFinancialDashboard() {
       },
       { 
         title: 'Farmer', 
-        dataIndex: 'name', 
-        key: 'name',
-        render: (text, record) => (
-          <div className="flex items-center">
-            <Avatar className="mr-2" style={{ backgroundColor: '#87d068' }}>
-              {text.charAt(0).toUpperCase()}
-            </Avatar>
-            <span>{text}</span>
-          </div>
-        )
+        dataIndex: 'id', 
+        key: 'farmer',
+        render: (id) => {
+          const farmer = farmers.find(f => f._id === id);
+          return farmer ? farmer.name : 'Unknown';
+        }
       },
-      { title: 'Region', dataIndex: 'region', key: 'region' },
       { 
         title: 'Revenue (Rs)', 
         dataIndex: 'revenue', 
@@ -1096,25 +1113,45 @@ export default function AdminFinancialDashboard() {
                     data={systemSalesChartData}
                     options={{
                       responsive: true,
+                      maintainAspectRatio: false,
                       plugins: {
                         legend: { position: 'bottom' }
                       }
                     }}
-                    height={300}
+                    height={300} // Reduced height
+                    width={300}  // Adjusted width
                   />
                 </Card>
               </Col>
               <Col span={12}>
-                <Card title="Regional Performance" className="shadow-sm h-full">
-                  <Bar
-                    data={regionalProfitData}
+                <Card title="Expense Distribution by Category" className="shadow-sm h-full">
+                  <Pie
+                    data={{
+                      labels: expenseCategories,
+                      datasets: [
+                        {
+                          label: 'Expenses (Rs)',
+                          data: expenseCategories.map(category =>
+                            expenses
+                              .filter(expense => expense.category === category)
+                              .reduce((sum, expense) => sum + expense.amount, 0)
+                          ),
+                          backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                            '#FF9F40', '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'
+                          ]
+                        }
+                      ]
+                    }}
                     options={{
                       responsive: true,
+                      maintainAspectRatio: false,
                       plugins: {
                         legend: { position: 'bottom' }
                       }
                     }}
-                    height={300}
+                    height={300} // Reduced height
+                    width={300}  // Adjusted width
                   />
                 </Card>
               </Col>
@@ -1123,7 +1160,7 @@ export default function AdminFinancialDashboard() {
             <Card title="Top Performing Farmers" className="shadow-sm">
               <Table
                 columns={farmerPerformanceColumns}
-                dataSource={farmerPerformance.sort((a, b) => b.profit - a.profit).slice(0, 5)}
+                dataSource={calculateFarmerPerformance().sort((a, b) => b.profit - a.profit).slice(0, 5)}
                 rowKey="id"
                 loading={loading}
                 pagination={false}
@@ -1157,19 +1194,18 @@ export default function AdminFinancialDashboard() {
           <Card
             title="Farmers Management"
             extra={
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => setIsFarmerModalVisible(true)}
-              >
-                Add Farmer
-              </Button>
+              <Input
+                placeholder="Search farmers..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ width: 200 }}
+              />
             }
             className="shadow-sm"
           >
             <Table
               columns={farmersColumns}
-              dataSource={farmers}
+              dataSource={filteredFarmers} // Use filtered farmers
               rowKey="_id"
               loading={loading}
               pagination={{ pageSize: 10 }}
@@ -1182,27 +1218,18 @@ export default function AdminFinancialDashboard() {
           <Card
             title="Sales Administration"
             extra={
-              <Space>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => setIsSaleModalVisible(true)}
-                >
-                  Add Sale
-                </Button>
-                <Button
-                  icon={<FileExcelOutlined />}
-                  onClick={() => message.info('Export to Excel feature coming soon')}
-                >
-                  Export
-                </Button>
-              </Space>
+              <Input
+                placeholder="Search sales by farmer name..."
+                value={salesSearchText}
+                onChange={(e) => setSalesSearchText(e.target.value)}
+                style={{ width: 200 }}
+              />
             }
             className="shadow-sm"
           >
             <Table
               columns={salesColumns}
-              dataSource={sales}
+              dataSource={filteredSales} // Use filtered sales
               rowKey="_id"
               loading={loading}
               pagination={{ pageSize: 10 }}
@@ -1213,21 +1240,20 @@ export default function AdminFinancialDashboard() {
       case 'expenses':
         return (
           <Card
-            title="Expense Administration"
+            title="Expense Tracking"
             extra={
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => setIsExpenseModalVisible(true)}
-              >
-                Add Expense
-              </Button>
+              <Input
+                placeholder="Search expenses by farmer name..."
+                value={expensesSearchText}
+                onChange={(e) => setExpensesSearchText(e.target.value)}
+                style={{ width: 200 }}
+              />
             }
             className="shadow-sm"
           >
             <Table
               columns={expensesColumns}
-              dataSource={expenses}
+              dataSource={filteredExpenses} // Use filtered expenses
               rowKey="_id"
               loading={loading}
               pagination={{ pageSize: 10 }}
@@ -1251,24 +1277,18 @@ export default function AdminFinancialDashboard() {
             <Row gutter={16}>
               <Col span={12}>
                 <Card title="Farmer Performance" className="shadow-sm h-full">
-                  <Scatter
-                    data={farmerPerformanceScatterData}
+                  <Bar
+                    data={farmerPerformanceBarData}
                     options={{
                       responsive: true,
+                      maintainAspectRatio: false,
                       plugins: {
-                        legend: {
-                          display: false
-                        },
+                        legend: { position: 'bottom' },
                         tooltip: {
                           callbacks: {
                             label: (context) => {
-                              const farmer = farmerPerformance.find(f => f.name === context.dataset.label);
-                              return [
-                                `Farmer: ${farmer.name}`,
-                                `Revenue: Rs ${farmer.revenue.toLocaleString()}`,
-                                `Expenses: Rs ${farmer.expenses.toLocaleString()}`,
-                                `Profit: Rs ${farmer.profit.toLocaleString()}`
-                              ];
+                              const value = context.raw.toLocaleString();
+                              return `${context.dataset.label}: Rs ${value}`;
                             }
                           }
                         }
@@ -1277,14 +1297,15 @@ export default function AdminFinancialDashboard() {
                         x: {
                           title: {
                             display: true,
-                            text: 'Expenses (Rs)'
+                            text: 'Farmers'
                           }
                         },
                         y: {
                           title: {
                             display: true,
-                            text: 'Revenue (Rs)'
-                          }
+                            text: 'Amount (Rs)'
+                          },
+                          beginAtZero: true
                         }
                       }
                     }}
@@ -1317,78 +1338,6 @@ export default function AdminFinancialDashboard() {
                 </Card>
               </Col>
             </Row>
-          </div>
-        );
-      case 'reports':
-        return (
-          <div className="space-y-6">
-            <Card title="Report Configuration" className="shadow-sm">
-              <Form layout="vertical">
-                <Row gutter={16}>
-                  <Col span={8}>
-                    <Form.Item label="Report Frequency">
-                      <Select
-                        value={reportConfig.frequency}
-                        onChange={(value) => handleReportConfigChange('frequency', value)}
-                      >
-                        <Option value="daily">Daily</Option>
-                        <Option value="weekly">Weekly</Option>
-                        <Option value="monthly">Monthly</Option>
-                        <Option value="quarterly">Quarterly</Option>
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                  <Col span={8}>
-                    <Form.Item label="Report Format">
-                      <Select
-                        value={reportConfig.format}
-                        onChange={(value) => handleReportConfigChange('format', value)}
-                      >
-                        <Option value="pdf">PDF</Option>
-                        <Option value="excel">Excel</Option>
-                        <Option value="csv">CSV</Option>
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                  <Col span={8}>
-                    <Form.Item label="Recipients">
-                      <Select
-                        mode="tags"
-                        value={reportConfig.recipients}
-                        onChange={(value) => handleReportConfigChange('recipients', value)}
-                        placeholder="Add email addresses"
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Button type="primary" icon={<SyncOutlined />}>
-                  Generate Report Now
-                </Button>
-              </Form>
-            </Card>
-
-            <Card title="Recent Reports" className="shadow-sm">
-  <List
-    dataSource={[
-      { name: 'System Financial Summary', date: dayjs().subtract(1, 'day'), type: 'pdf' },
-      { name: 'Regional Performance', date: dayjs().subtract(3, 'days'), type: 'excel' },
-      { name: 'Monthly Crop Analysis', date: dayjs().subtract(1, 'week'), type: 'pdf' }
-    ]}
-    renderItem={(item) => (
-      <List.Item
-        actions={[
-          <Button type="link" icon={<FilePdfOutlined />}>Download</Button>,
-          <Button type="link" icon={<EditOutlined />}>Resend</Button>
-        ]}
-      >
-        <List.Item.Meta
-          title={item.name}
-          description={`Generated ${dayjs(item.date).fromNow()} (${dayjs(item.date).format('YYYY-MM-DD')})`}
-        />
-      </List.Item>
-    )}
-  />
-</Card>
           </div>
         );
       case 'settings':
@@ -1506,32 +1455,6 @@ export default function AdminFinancialDashboard() {
               <Option value="all">All Crops</Option>
               {cropTypes.map(crop => (
                 <Option key={crop} value={crop}>{crop}</Option>
-              ))}
-            </Select>
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Farmer Filter</label>
-            <Select
-              value={farmerFilter}
-              onChange={setFarmerFilter}
-              className="w-full"
-            >
-              <Option value="all">All Farmers</Option>
-              {farmers.map(farmer => (
-                <Option key={farmer._id} value={farmer._id}>{farmer.name}</Option>
-              ))}
-            </Select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Region Filter</label>
-            <Select
-              value={regionFilter}
-              onChange={setRegionFilter}
-              className="w-full"
-            >
-              <Option value="all">All Regions</Option>
-              {regions.map(region => (
-                <Option key={region} value={region}>{region}</Option>
               ))}
             </Select>
           </div>

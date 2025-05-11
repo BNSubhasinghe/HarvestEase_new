@@ -1,6 +1,5 @@
 const Expenses = require('../models/expensesModel');
 
-
 const getExpensesByUser = async (req, res) => {
   try {
     let filter = { user: req.params.user }; // Filter by user ID
@@ -94,11 +93,21 @@ const getExpensesSummary = async (req, res) => {
   }
 };
 
+const getAdminExpenses = async (req, res) => {
+  try {
+    const expenses = await Expenses.find().sort({ date: -1 });
+    res.status(200).json(expenses);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getExpensesByUser,
   getAllExpenses,
   createExpense,
   updateExpense,
   deleteExpense,
-  getExpensesSummary
+  getExpensesSummary,
+  getAdminExpenses
 };

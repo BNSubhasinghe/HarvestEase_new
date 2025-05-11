@@ -82,7 +82,7 @@ function App() {
     }
 
     if (!access.includes(currentUser?.role)) {
-      navigate("/not-authorized");
+      navigate("/");
     }
     
     return element;
@@ -198,7 +198,9 @@ function App() {
             <Route path="/nadu-stock-detail" element={<NaduStockDetail />} />
                 
                 
-         </Routes>
+
+              </Routes>
+              <Footer />
     </>
   );
 }

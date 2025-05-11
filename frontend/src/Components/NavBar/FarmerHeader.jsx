@@ -64,11 +64,37 @@ const FarmerHeader = () => {
           <Link to="/" className="hover:text-yellow-300">Home</Link>
           <Link to="/service" className="hover:text-yellow-300">Service</Link>
           <Link to="/about" className="hover:text-yellow-300">About</Link>
-          <Link to="/crop-landing" className="hover:text-yellow-300">Crop</Link>
+          {!hasRoleAccess(["farmer", "admin"]) && (
+            <Link to="/shop" className="hover:text-yellow-300">Shop</Link>
+          )}
+          {hasRoleAccess(["farmer", "admin"]) && (<Link to="/crop-landing" className="hover:text-yellow-300">Crop</Link>)}
           {hasRoleAccess(["farmer", "admin"]) && (<Link to="/finance" className="hover:text-yellow-300">Finance</Link>)}
+          {hasRoleAccess(["farmer", "admin"]) && (
+            <div className="relative inline-block" ref={stockDropdownRef}>
+              <button
+                onClick={handleStockDropdown}
+                className="hover:text-yellow-300"
+              >
+                Stock
+              </button>
+              {stockDropdown && (
+                <div className="absolute top-[-10px] bg-white text-green-800 rounded-md shadow-lg mt-[58px] w-[140px]">
+                  <div className="mb-[5px] mt-[5px] flex flex-col items-start content-start">
+                    <button className="mb-[5px] mt-[5px] m-[5px]">
+                      <Link to="/stock-management" className="hover:text-yellow-300 p-2 text-center w-full text-left">Inventory</Link>
+                    </button>
+                    <button className="mt-[5px] mb-[5px] m-[5px]">
+                      <Link to="/shop" className="hover:text-yellow-300 p-2 text-center w-full text-left">Shop</Link>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          {hasRoleAccess(["farmer", "admin"]) && (<Link to="/disease-user" className="hover:text-yellow-300">Plant Care</Link>)}
           
 
-          {/* Stock Dropdown */}
+          {/*
           <div className="relative inline-block" ref={stockDropdownRef}>
             <button
               onClick={handleStockDropdown}
@@ -88,9 +114,8 @@ const FarmerHeader = () => {
                 </div>
               </div>
             )}
-          </div>
+          </div>*/}
 
-          <Link to="/disease-user" className="hover:text-yellow-300">Plant Care</Link>
 
           {currentUser ? (
             <>
